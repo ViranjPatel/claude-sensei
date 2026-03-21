@@ -1,0 +1,4 @@
+.claude-sensei/
+*.log
+.DS_Store
+Thumbs.db

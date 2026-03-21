@@ -1,0 +1,189 @@
+[
+  {
+    "id": "mem-001",
+    "title": "Start Every Project with CLAUDE.md",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "Create a CLAUDE.md file at the root of every project you work on with Claude Code. This file is automatically read at the start of every session, giving Claude persistent context about your project without you having to re-explain it each time.",
+    "example": "# MyApp CLAUDE.md\n\n## Project Overview\nReact + Node.js e-commerce app. Backend at ./server, frontend at ./client.\n\n## Tech Stack\n- Frontend: React 18, TypeScript, Tailwind CSS\n- Backend: Node.js, Express, PostgreSQL\n- Testing: Jest, React Testing Library\n\n## Key Commands\n- `npm run dev` - start both servers\n- `npm test` - run all tests\n- `npm run build` - production build",
+    "why": "Without CLAUDE.md, you repeat context every session. With it, Claude immediately understands your stack, conventions, and commands — saving 5-10 minutes of re-orientation per session.",
+    "source": "anthropic-docs",
+    "tags": ["claude.md", "project-setup", "context", "productivity"]
+  },
+  {
+    "id": "mem-002",
+    "title": "Use /compact to Preserve Context When Nearing Limits",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "When your conversation grows long and you see warnings about context limits, run /compact before starting new tasks. This summarizes the conversation history into a compressed form, freeing up context window space while retaining the essential information Claude needs.",
+    "example": "# When you see the context warning, type:\n/compact\n\n# Claude will summarize the conversation and you can continue:\n# 'Now let's tackle the authentication module...'",
+    "why": "/compact prevents abrupt context truncation that causes Claude to lose track of earlier decisions, file paths, and constraints. A deliberate compact preserves the most important state.",
+    "source": "anthropic-docs",
+    "tags": ["context-management", "compact", "long-sessions"]
+  },
+  {
+    "id": "mem-003",
+    "title": "Document Team Conventions in CLAUDE.md",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "Add your team's specific conventions to CLAUDE.md so every developer gets consistent Claude behavior. Include naming conventions, code style preferences, and any team-specific patterns that differ from defaults.",
+    "example": "## Code Conventions\n- Use named exports only (no default exports)\n- File names: kebab-case (e.g., user-profile.tsx)\n- Component names: PascalCase\n- Always add JSDoc for public functions\n- Error handling: use Result<T, E> pattern from ./src/types/result.ts\n\n## Git Conventions\n- Commit format: feat(scope): description\n- Branch format: type/ticket-description (e.g., feat/AUTH-123-login-flow)",
+    "why": "When conventions live in CLAUDE.md, all team members get the same Claude behavior and generated code matches your codebase style without manual correction.",
+    "source": "anthropic-docs",
+    "tags": ["conventions", "team", "consistency", "code-style"]
+  },
+  {
+    "id": "mem-004",
+    "title": "Keep CLAUDE.md Concise and Actionable",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "Resist the urge to write an encyclopedia in CLAUDE.md. Keep it under 500 lines, focused on things Claude actually needs to make decisions. Every token in CLAUDE.md uses context window space on every request.",
+    "example": "# BAD - too verbose\n## About Our Company\nWe were founded in 2015 with a mission to...\n[3 paragraphs of company history]\n\n# GOOD - focused and actionable\n## Critical Rules\n- NEVER use `any` in TypeScript — use `unknown` and narrow types\n- All DB queries must go through ./src/db/query-builder.ts\n- Run `npm run typecheck` before declaring any task complete",
+    "why": "A concise CLAUDE.md is read and applied on every turn. A bloated one dilutes signal and wastes context that could hold your actual code.",
+    "source": "anthropic-docs",
+    "tags": ["claude.md", "optimization", "concise", "best-practices"]
+  },
+  {
+    "id": "mem-005",
+    "title": "Separate Personal Preferences from Project Config",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "Use ~/.claude/CLAUDE.md for personal cross-project preferences and the project CLAUDE.md for project-specific rules. This prevents your personal style from being committed to team repos.",
+    "example": "# ~/.claude/CLAUDE.md (personal, never committed)\n## My Preferences\n- Always explain your reasoning before writing code\n- Use descriptive variable names, never single letters except loop counters\n- When uncertain, show me 2 options and ask which I prefer\n\n# ./CLAUDE.md (project, committed to repo)\n## Project Rules\n- Use the company ESLint config at .eslintrc.js\n- Tests required for all new functions",
+    "why": "Personal preferences shouldn't be forced on teammates. Separating them lets you customize Claude behavior for yourself while keeping the repo config clean and shared.",
+    "source": "anthropic-docs",
+    "tags": ["personal-config", "global-config", "team", "separation-of-concerns"]
+  },
+  {
+    "id": "mem-006",
+    "title": "Always Include Test and Lint Commands",
+    "level": "beginner",
+    "category": "memory",
+    "tip": "Add your project's test, lint, and type-check commands to CLAUDE.md. Claude will run these automatically to verify its work, catching bugs before you even see the output.",
+    "example": "## Validation Commands\n- Type check: `npx tsc --noEmit`\n- Lint: `npm run lint`\n- Unit tests: `npm test`\n- Integration tests: `npm run test:integration`\n- Full check: `npm run validate` (runs all of the above)\n\n## Important\nAlways run `npm run validate` after making changes before saying you're done.",
+    "why": "When Claude knows your validation commands, it creates a self-correction loop — it writes code, runs checks, fixes errors, and only presents you with working code.",
+    "source": "anthropic-docs",
+    "tags": ["testing", "validation", "quality", "automation"]
+  },
+  {
+    "id": "mem-007",
+    "title": "Use Layered CLAUDE.md Files for Monorepos",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "In monorepos or large projects with distinct sub-areas, create CLAUDE.md files at subdirectory levels. Claude reads all CLAUDE.md files from the root down to the current working directory, building layered context.",
+    "example": "# Directory structure:\n./CLAUDE.md              # Root: shared conventions, overall architecture\n./packages/api/CLAUDE.md # API-specific: database patterns, auth middleware\n./packages/web/CLAUDE.md # Web-specific: component patterns, state management\n./packages/shared/CLAUDE.md # Shared lib: type conventions, utility patterns\n\n# Root CLAUDE.md:\n## Monorepo Structure\nThis is a Turborepo monorepo. Packages share code via @myapp/shared.\n\n# packages/api/CLAUDE.md:\n## API Conventions\nAll routes use Zod validation. Auth via JWT in Authorization header.",
+    "why": "Layered configs mean context is scoped appropriately — you get global rules everywhere plus local rules when working in specific packages, without bloating any single file.",
+    "source": "anthropic-docs",
+    "tags": ["monorepo", "layered-config", "organization", "scalability"]
+  },
+  {
+    "id": "mem-008",
+    "title": "Use Memory Files for Long-Running Research",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "For complex tasks spanning multiple sessions (like a large refactor or architecture redesign), create a dedicated memory file (e.g., TASK_NOTES.md) and instruct Claude to update it as it discovers information.",
+    "example": "# In your prompt:\n'I want to refactor our authentication system. Create REFACTOR_NOTES.md\nand update it as we work. Record: files examined, patterns found,\ndecisions made, and remaining work. Check this file at the start\nof each session to resume context.'\n\n# REFACTOR_NOTES.md (auto-maintained by Claude):\n## Auth Refactor Progress\n### Examined\n- src/auth/jwt.ts: uses jsonwebtoken 8.x (needs upgrade)\n- src/middleware/auth.ts: mixes auth + authz logic\n### Decisions\n- Upgrade to jose library (better TypeScript support)\n### Remaining\n- [ ] Update 23 route handlers to use new middleware",
+    "why": "Context windows reset between sessions. Memory files let complex multi-day work continue without losing discovered context and decisions.",
+    "source": "community",
+    "tags": ["memory-files", "long-running-tasks", "persistence", "context"]
+  },
+  {
+    "id": "mem-009",
+    "title": "Write Negative Instructions to Prevent Recurring Mistakes",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "When Claude makes the same mistake multiple times, add a negative instruction to CLAUDE.md using 'NEVER' or 'DO NOT'. These explicit prohibitions are more effective than positive restatements of the correct pattern.",
+    "example": "## Critical Rules — Read Before Every Change\n\n### NEVER DO:\n- NEVER use `console.log` for debugging — use the `logger` from ./src/utils/logger.ts\n- NEVER modify files in ./src/generated/ — these are auto-generated\n- NEVER use `npm install` — this project uses `pnpm install`\n- NEVER import directly from lodash — use our wrapper at ./src/utils/lodash.ts\n- NEVER use `as any` to bypass TypeScript errors — fix the types",
+    "why": "Positive instructions can be interpreted loosely. 'NEVER use X' is unambiguous and sticks in Claude's attention better than 'prefer Y over X'.",
+    "source": "community",
+    "tags": ["negative-instructions", "error-prevention", "conventions", "claude.md"]
+  },
+  {
+    "id": "mem-010",
+    "title": "Reference External Files Instead of Inlining Content",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "Instead of copying large documents into CLAUDE.md, reference them by path and instruct Claude to read them when relevant. This keeps CLAUDE.md concise while making detailed docs available on demand.",
+    "example": "## References\n- API design standards: see ./docs/api-standards.md\n- Database schema: see ./docs/schema.md\n- Security requirements: see ./docs/security-checklist.md\n- Deployment process: see ./docs/deploy.md\n\n## When to Read These\nWhen creating API endpoints, read api-standards.md first.\nWhen writing DB queries, read schema.md first.\nWhen handling user data, read security-checklist.md first.",
+    "why": "Inline content always occupies context. Referenced files are only read when needed, giving you detailed guidance without a context-window cost on every turn.",
+    "source": "community",
+    "tags": ["file-references", "context-optimization", "documentation", "claude.md"]
+  },
+  {
+    "id": "mem-011",
+    "title": "Document Architecture Decisions in CLAUDE.md",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "Record the 'why' behind architectural decisions in CLAUDE.md so Claude doesn't second-guess or undo them. Include the tradeoffs you considered and rejected alternatives.",
+    "example": "## Architecture Decisions\n\n### State Management: Zustand (not Redux)\nWe chose Zustand over Redux for simplicity. DO NOT suggest migrating to Redux.\nThe team decided the Redux boilerplate cost isn't worth it at our scale.\n\n### API Layer: tRPC (not REST)\nType-safe APIs without code generation. All new endpoints must use tRPC.\nDO NOT create REST endpoints — direct all traffic through tRPC routers.\n\n### CSS: Tailwind only (no CSS modules or styled-components)\nDesign system via Tailwind config. DO NOT introduce other CSS solutions.",
+    "why": "Without documented decisions, Claude may suggest 'improvements' that conflict with deliberate choices, creating churn and confusion during code reviews.",
+    "source": "community",
+    "tags": ["architecture", "decisions", "adr", "context"]
+  },
+  {
+    "id": "mem-012",
+    "title": "Add Coding Style Examples to CLAUDE.md",
+    "level": "intermediate",
+    "category": "memory",
+    "tip": "Include short code examples of your preferred patterns directly in CLAUDE.md. Showing is more effective than describing, especially for nuanced style choices.",
+    "example": "## Code Style Examples\n\n### Error Handling Pattern\n```typescript\n// CORRECT: use Result type\nasync function getUser(id: string): Promise<Result<User, AppError>> {\n  try {\n    const user = await db.users.findById(id);\n    return ok(user);\n  } catch (e) {\n    return err(new AppError('USER_NOT_FOUND', e));\n  }\n}\n\n// WRONG: throwing errors\nasync function getUser(id: string): Promise<User> {\n  // Don't do this\n  return await db.users.findById(id); // throws on failure\n}\n```",
+    "why": "A concrete example removes ambiguity. Claude can mirror the exact pattern rather than interpreting a description, leading to consistent code across the codebase.",
+    "source": "community",
+    "tags": ["code-style", "examples", "patterns", "consistency"]
+  },
+  {
+    "id": "mem-013",
+    "title": "Structure CLAUDE.md for Prompt Caching",
+    "level": "advanced",
+    "category": "memory",
+    "tip": "Anthropic's API caches prompt prefixes. Structure CLAUDE.md with stable content at the top (architecture, conventions) and frequently-changing content at the bottom. This maximizes cache hits and reduces latency and cost.",
+    "example": "# CLAUDE.md Structure for Cache Efficiency\n\n## [TOP — Stable, cached] Project Overview\nThis is a React/Node.js app for managing...\n\n## [TOP — Stable, cached] Architecture\nFrontend: ./client | Backend: ./server\n\n## [TOP — Stable, cached] Conventions\nNaming, style, patterns...\n\n## [BOTTOM — Changes often] Current Sprint\nWe're currently working on the payment integration.\nFocus: Stripe webhook handling in ./server/webhooks/\n\n## [BOTTOM — Changes often] Known Issues\n- Bug in OrderProcessor needs investigation",
+    "why": "Content that appears identically across requests gets cached after the first read. Placing stable rules at the top means they're almost always served from cache, improving response speed.",
+    "source": "anthropic-docs",
+    "tags": ["prompt-caching", "performance", "optimization", "advanced"]
+  },
+  {
+    "id": "mem-014",
+    "title": "Use Plan Mode Before Tackling Complex Memory Tasks",
+    "level": "advanced",
+    "category": "memory",
+    "tip": "Before starting a large task that requires Claude to explore many files and build context, enable plan mode (Shift+Tab or --plan flag). Claude will read and analyze without making changes, building a comprehensive understanding before acting.",
+    "example": "# Start in plan mode for complex tasks:\n# Press Shift+Tab to enter plan mode, then:\n'Analyze our entire authentication system:\n- Map all auth-related files\n- Identify the current flow\n- Find security issues\n- Plan the refactor to OAuth2\nDon't make changes yet — just build the plan and present it to me.'\n\n# Claude explores, then presents:\n# 'I found 23 files involved in auth. Here's the current flow...\n# Here's my proposed refactor plan with 5 phases...'",
+    "why": "Plan mode prevents premature changes while Claude is still exploring. You get a comprehensive analysis and can course-correct the approach before any code is touched.",
+    "source": "anthropic-docs",
+    "tags": ["plan-mode", "complex-tasks", "analysis", "safety"]
+  },
+  {
+    "id": "mem-015",
+    "title": "Automate Memory Updates with PostToolUse Hooks",
+    "level": "advanced",
+    "category": "memory",
+    "tip": "Write a PostToolUse hook that automatically updates a session log or memory file whenever Claude creates or modifies significant files. This creates an automatic audit trail and memory system.",
+    "example": "# .claude/hooks/update-memory.sh\n#!/bin/bash\n# PostToolUse hook for Write tool\nFILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path')\nif [[ \"$FILE\" == *.ts || \"$FILE\" == *.tsx ]]; then\n  TIMESTAMP=$(date +%Y-%m-%dT%H:%M:%S)\n  echo \"[$TIMESTAMP] Modified: $FILE\" >> .claude/session-log.md\nfi\n\n# .claude/settings.json\n{\n  \"hooks\": {\n    \"PostToolUse\": [{\n      \"matcher\": \"Write\",\n      \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/update-memory.sh\"}]\n    }]\n  }\n}",
+    "why": "Automatic memory reduces cognitive overhead. You can review what Claude touched in a session without manually tracking changes, and the log serves as context for future sessions.",
+    "source": "community",
+    "tags": ["hooks", "automation", "memory", "audit-trail", "advanced"]
+  },
+  {
+    "id": "mem-016",
+    "title": "Create Topic-Scoped Memory Files for Large Domains",
+    "level": "advanced",
+    "category": "memory",
+    "tip": "For large domains with distinct subsystems, create separate memory files per topic and include them selectively based on the task. Reference them in CLAUDE.md with explicit loading instructions.",
+    "example": "# File structure:\n.claude/\n  memory/\n    database.md       # Schema, query patterns, migrations\n    frontend.md       # Component library, design tokens\n    infrastructure.md # Deployment, env vars, secrets management\n    testing.md        # Test patterns, fixtures, mocking strategies\n\n# In CLAUDE.md:\n## Specialized Memory\nFor database work, read .claude/memory/database.md first.\nFor frontend work, read .claude/memory/frontend.md first.\nFor deployment, read .claude/memory/infrastructure.md first.",
+    "why": "Domain-specific context is only relevant for domain-specific tasks. Loading it selectively keeps context windows clean and ensures Claude has exactly the right depth of knowledge.",
+    "source": "community",
+    "tags": ["topic-scoping", "memory-organization", "advanced", "context"]
+  },
+  {
+    "id": "mem-017",
+    "title": "Prune CLAUDE.md Based on What Claude Actually Uses",
+    "level": "advanced",
+    "category": "memory",
+    "tip": "Periodically audit which CLAUDE.md instructions Claude actually follows versus ignores. Remove instructions that don't affect behavior and expand ones Claude consistently misses. Treat CLAUDE.md as code that needs maintenance.",
+    "example": "# Audit by asking Claude directly:\n'Review our CLAUDE.md. For each instruction:\n1. Tell me if you actually follow it or tend to ignore it\n2. Identify any conflicting instructions\n3. Flag anything that's vague or hard to apply\n4. Suggest what to add based on mistakes you've made'\n\n# Then prune ruthlessly:\n# Remove: instructions Claude ignores anyway\n# Strengthen: instructions Claude partially follows\n# Add: rules prompted by recurring corrections you've made",
+    "why": "Dead instructions waste context. Active instructions that Claude doesn't follow give false confidence. Regular pruning keeps CLAUDE.md lean and effective.",
+    "source": "community",
+    "tags": ["maintenance", "optimization", "pruning", "audit", "advanced"]
+  }
+]

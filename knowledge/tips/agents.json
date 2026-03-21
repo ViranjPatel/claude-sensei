@@ -1,0 +1,189 @@
+[
+  {
+    "id": "agent-001",
+    "title": "Understand What Agents Are in Claude Code",
+    "level": "beginner",
+    "category": "agents",
+    "tip": "Agents in Claude Code are specialized AI instances with focused roles, specific tool access, and defined system prompts. They're invoked via the Agent tool and run as subprocesses of the main Claude session, inheriting or restricting the parent's capabilities.",
+    "example": "# Agents differ from regular Claude use:\n# Regular: One Claude instance doing everything\n# Agents: Claude spawns specialized helpers\n\n# Example: A code review agent with limited tools:\n{\n  \"name\": \"code-reviewer\",\n  \"description\": \"Reviews code for quality and security issues\",\n  \"tools\": [\"Read\", \"Glob\", \"Grep\"],  // read-only tools only\n  \"prompt\": \"You are a code reviewer. Only read files. Never write.\"\n}",
+    "why": "Understanding the agent model helps you design workflows where specialized agents do focused tasks with appropriate permissions, rather than one agent doing everything with full access.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "fundamentals", "overview", "concepts"]
+  },
+  {
+    "id": "agent-002",
+    "title": "Know When to Use Agents vs Custom Commands",
+    "level": "beginner",
+    "category": "agents",
+    "tip": "Use custom commands for simple, structured prompts that guide a single Claude session. Use agents when you need specialized behavior, tool restrictions, a different model, or parallel execution across multiple workstreams.",
+    "example": "# Custom command: good for guided prompts\n# .claude/commands/review.md\nReview the code in $ARGUMENTS for code quality issues.\n\n# Agent: better when you need isolation or specialization\n# .claude/agents/security-auditor.md\n---\nname: security-auditor\nmodel: claude-opus-4-5\ntools:\n  - Read\n  - Grep\n  - Glob\n---\nYou are a security auditor. Focus exclusively on security vulnerabilities.\nNever suggest feature changes. Report findings in SARIF format.",
+    "why": "Choosing the right abstraction prevents over-engineering. Commands are simpler to write and debug. Agents add value when you genuinely need different tools, models, or isolated execution.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "commands", "decision", "when-to-use"]
+  },
+  {
+    "id": "agent-003",
+    "title": "Create Your First Agent with Frontmatter",
+    "level": "beginner",
+    "category": "agents",
+    "tip": "Agents are defined as markdown files in .claude/agents/. The frontmatter configures the agent's name, model, tools, and description. The body of the file is the system prompt.",
+    "example": "# .claude/agents/test-writer.md\n---\nname: test-writer\ndescription: Generates comprehensive unit tests for TypeScript code\nmodel: claude-haiku-3-5\ntools:\n  - Read\n  - Write\n  - Bash\n---\n\nYou are a test-writing specialist. Your only job is to write Jest unit tests.\n\n## Rules\n- Read the source file first to understand the interface\n- Write tests to ./src/__tests__/ directory\n- Use describe/it blocks with descriptive names\n- Always include edge cases and error paths\n- Run tests with `npx jest` and fix failures before finishing",
+    "why": "The agent file format is clean and readable. Frontmatter handles config, the body handles behavior — you can read an agent file and immediately understand what it does and how.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "frontmatter", "creation", "setup", "beginner"]
+  },
+  {
+    "id": "agent-004",
+    "title": "Understand Agent Tool Restrictions",
+    "level": "beginner",
+    "category": "agents",
+    "tip": "The tools listed in an agent's frontmatter are the only tools that agent can use. Omitting dangerous tools (like Bash or Write) creates read-only agents that can analyze without making changes.",
+    "example": "# Read-only analysis agent — safe to run without supervision\n---\nname: code-analyzer\ndescription: Analyzes codebase and reports findings without making changes\ntools:\n  - Read\n  - Glob\n  - Grep\n---\n\n# Risky: agent with full tool access\n---\nname: full-access-agent  # Avoid unless truly needed\ntools:\n  - Read\n  - Write\n  - Edit\n  - Bash\n  - Computer  # Especially this one\n---",
+    "why": "Minimal tool access follows the principle of least privilege. A read-only agent literally cannot make breaking changes, giving you safety without requiring supervision on every action.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "tools", "permissions", "security", "least-privilege"]
+  },
+  {
+    "id": "agent-005",
+    "title": "Invoke Agents with the Agent Tool",
+    "level": "beginner",
+    "category": "agents",
+    "tip": "Claude can invoke agents from within a conversation using the Agent tool, or agents can be triggered via custom commands. You can also refer to agents by name in your prompts when Claude Code knows about them.",
+    "example": "# In a conversation, Claude auto-invokes named agents:\n'Run the test-writer agent on ./src/payment-processor.ts'\n\n# Or in a custom command:\n# .claude/commands/write-tests.md\n---\ndescription: Generate tests for a file\n---\nInvoke the test-writer agent on the file at $ARGUMENTS.\nAfter tests are written, run them and report the results.\n\n# Direct invocation in prompt:\n'Use the security-auditor agent to scan ./src/auth/'",
+    "why": "Multiple invocation paths mean agents can be triggered conversationally, via commands, or by other agents — making them composable building blocks for complex workflows.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "invocation", "agent-tool", "usage"]
+  },
+  {
+    "id": "agent-006",
+    "title": "Write Focused System Prompts for Agents",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "An agent's system prompt should have a single, clear role definition, explicit behavioral constraints, and specific output formats. Avoid general-purpose prompts — the more focused, the better the agent performs.",
+    "example": "# .claude/agents/migration-writer.md\n---\nname: migration-writer\ndescription: Writes database migration files from schema changes\ntools: [Read, Write, Bash]\n---\n\nYou write database migrations for PostgreSQL using Knex.js.\n\n## Your Input\nYou receive a description of a schema change.\n\n## Your Output\nA single migration file at ./migrations/TIMESTAMP_description.js\n\n## Rules\n- ONLY write migration files. Do not modify application code.\n- Always include both `up` and `down` functions\n- Test the migration with `npx knex migrate:latest`\n- If migration fails, fix and retry until it passes\n- Report only: filename created, tables affected, success/failure",
+    "why": "Focused prompts produce predictable agents. A migration agent that only creates migration files is easy to trust, debug, and reuse. A general agent doing 'database stuff' is unpredictable.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "system-prompt", "focus", "design", "intermediate"]
+  },
+  {
+    "id": "agent-007",
+    "title": "Use Different Models for Different Agent Roles",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "Match model capability to task complexity. Use claude-opus for complex reasoning agents, claude-sonnet for balanced tasks, and claude-haiku for fast, simple, high-frequency agents.",
+    "example": "# High-stakes architect agent: use Opus\n---\nname: architect\nmodel: claude-opus-4-5\ndescription: Makes architectural decisions and designs system components\n---\n\n# Workhorse feature agent: use Sonnet\n---\nname: feature-builder\nmodel: claude-sonnet-4-5\ndescription: Implements features from specifications\n---\n\n# Fast utility agent: use Haiku\n---\nname: file-renamer\nmodel: claude-haiku-3-5\ndescription: Renames files according to naming conventions\n---",
+    "why": "Using Opus for every agent is expensive and slow. Haiku for simple tasks is 10x faster and cheaper. Matching models to complexity optimizes both cost and speed.",
+    "source": "anthropic-docs",
+    "tags": ["agents", "model-selection", "cost", "performance", "intermediate"]
+  },
+  {
+    "id": "agent-008",
+    "title": "Add Colors and Namespacing to Agent Names",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "Use consistent naming prefixes to organize agents by domain. In multi-agent systems, clear naming makes it obvious which agent is responsible for what, and which output came from which agent.",
+    "example": "# Domain namespacing:\n.claude/agents/\n  db/\n    db-migrate.md      # Database migration writer\n    db-seed.md         # Seed data generator\n    db-schema-check.md # Schema validator\n  frontend/\n    fe-component.md    # React component generator\n    fe-story.md        # Storybook story writer\n    fe-style.md        # CSS/Tailwind stylist\n  infra/\n    infra-tf.md        # Terraform plan writer\n    infra-k8s.md       # Kubernetes manifest generator\n\n# Naming convention: domain-verb or domain-noun",
+    "why": "Namespaced agent names make large agent libraries navigable. A developer can discover db/* agents for database work without reading every agent file.",
+    "source": "community",
+    "tags": ["agents", "naming", "organization", "namespacing", "intermediate"]
+  },
+  {
+    "id": "agent-009",
+    "title": "Design Triggering Examples in Agent Descriptions",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "The description field is how Claude decides which agent to use. Include example trigger phrases and describe the inputs/outputs clearly so Claude can confidently route requests to the right agent.",
+    "example": "---\nname: api-doc-writer\ndescription: |\n  Generates OpenAPI/Swagger documentation from TypeScript route handlers.\n  \n  Trigger when asked to:\n  - 'document the API'\n  - 'write OpenAPI spec'\n  - 'generate swagger docs'\n  - 'create API documentation for [file]'\n  \n  Input: TypeScript Express/Fastify route file path\n  Output: OpenAPI 3.0 YAML file at ./docs/api/[name].yaml\ntools: [Read, Write]\n---",
+    "why": "Explicit trigger phrases in descriptions improve agent routing accuracy. Claude can match user intent to the right agent rather than guessing from a vague one-line description.",
+    "source": "community",
+    "tags": ["agents", "description", "routing", "discoverability", "intermediate"]
+  },
+  {
+    "id": "agent-010",
+    "title": "Build Multi-Agent Pipelines for Complex Tasks",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "Chain agents sequentially where each agent's output becomes the next agent's input. A pipeline agent orchestrates the flow: analyze → design → implement → test → document.",
+    "example": "# .claude/commands/full-feature.md\n---\ndescription: Build a complete feature end-to-end\n---\nBuild the feature described in $ARGUMENTS using this pipeline:\n\n1. Invoke the architect agent to design the feature and write a spec to ./tmp/spec.md\n2. Invoke the feature-builder agent with the spec from ./tmp/spec.md\n3. Invoke the test-writer agent on all newly created files\n4. Invoke the doc-writer agent to document the public API\n5. Run `npm run validate` and fix any failures\n6. Report: files created, tests passing, docs written",
+    "why": "Sequential pipelines break complex features into manageable, verifiable stages. Each agent does one thing well, and failures are isolated to a specific stage.",
+    "source": "community",
+    "tags": ["agents", "pipelines", "multi-agent", "orchestration", "intermediate"]
+  },
+  {
+    "id": "agent-011",
+    "title": "Use Agent Subagent Patterns for Parallel Workstreams",
+    "level": "intermediate",
+    "category": "agents",
+    "tip": "When tasks are independent, invoke multiple agents in parallel using the Agent tool. The orchestrating Claude instance can describe parallel invocations and synthesize results.",
+    "example": "# Prompt enabling parallel agent execution:\n'I want to refactor the authentication system. Use parallel agents:\n- Have agent1 analyze ./src/auth/ for issues\n- Have agent2 review ./src/middleware/ for auth-related code\n- Have agent3 check ./src/routes/ for authorization patterns\nAll three can run simultaneously. Collect their reports and give me a unified summary.'\n\n# Claude will invoke three Agent tool calls in parallel,\n# then synthesize the three analysis reports into one.",
+    "why": "Parallel agent execution can reduce wall-clock time by 3-5x for independent analysis tasks. What would take 15 minutes sequentially takes 5 minutes in parallel.",
+    "source": "community",
+    "tags": ["agents", "parallel", "performance", "multi-agent", "intermediate"]
+  },
+  {
+    "id": "agent-012",
+    "title": "Implement Lead-Agent Delegation Patterns",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Create a lead orchestrator agent that decomposes a large task, delegates subtasks to specialist agents, collects results, and synthesizes them. The lead agent's system prompt should focus on coordination, not implementation.",
+    "example": "# .claude/agents/project-lead.md\n---\nname: project-lead\nmodel: claude-opus-4-5\ndescription: Orchestrates complex multi-step development tasks\ntools: [Read, Write, Bash, Agent]\n---\n\nYou are a project lead who delegates to specialists. You do NOT write code.\n\n## Your Process\n1. Decompose the task into discrete subtasks\n2. Identify which specialist agent handles each subtask\n3. Create a task manifest at ./tmp/task-manifest.json\n4. Invoke specialist agents sequentially or in parallel as appropriate\n5. Verify each specialist's output before proceeding\n6. Synthesize final report\n\n## Available Specialists\n- test-writer: writes tests\n- doc-writer: writes documentation  \n- security-auditor: reviews security\n- code-reviewer: reviews code quality",
+    "why": "A lead agent that only coordinates (not implements) scales better than one agent doing everything. The lead maintains the big picture while specialists develop depth.",
+    "source": "community",
+    "tags": ["agents", "orchestration", "lead-agent", "delegation", "advanced"]
+  },
+  {
+    "id": "agent-013",
+    "title": "Use Worktrees with Agents for True Parallel Execution",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Combine Git worktrees with agents to run parallel agents on isolated filesystem copies. Each agent works in its own worktree, preventing file conflicts while enabling true concurrent execution.",
+    "example": "# Create worktrees for parallel agent work\ngit worktree add ../feature-auth feature/auth\ngit worktree add ../feature-payments feature/payments\ngit worktree add ../feature-notifications feature/notifications\n\n# Then instruct Claude:\n'Run parallel agents on the three worktrees:\n- Agent on ../feature-auth: implement OAuth2 login\n- Agent on ../feature-payments: implement Stripe integration  \n- Agent on ../feature-notifications: implement email notifications\nEach agent works independently. Report when all three are done.'\n\n# Clean up worktrees when done:\ngit worktree remove ../feature-auth",
+    "why": "Without worktrees, parallel agents on the same directory race on file writes. Worktrees give each agent a clean sandbox, enabling true parallel development without conflicts.",
+    "source": "community",
+    "tags": ["agents", "worktrees", "parallel", "isolation", "advanced"]
+  },
+  {
+    "id": "agent-014",
+    "title": "Build Agents That Drive Development Cycles",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Design agents that implement full TDD cycles autonomously: write failing tests, implement code to pass them, refactor, and verify. The agent loops until tests pass without human intervention.",
+    "example": "# .claude/agents/tdd-implementer.md\n---\nname: tdd-implementer\nmodel: claude-sonnet-4-5\ndescription: Implements features using strict TDD — tests first, then implementation\ntools: [Read, Write, Edit, Bash]\n---\n\nYou practice strict TDD. Never write implementation before tests.\n\n## TDD Cycle\n1. Read the feature specification\n2. Write failing tests (run them to confirm they fail)\n3. Write minimal implementation to pass tests\n4. Run tests — if failing, fix implementation (not tests)\n5. Refactor while keeping tests green\n6. Repeat until all acceptance criteria are covered\n\n## Exit Criteria\nOnly report success when ALL tests pass with `npm test`.",
+    "why": "An autonomous TDD agent can implement features end-to-end with verified correctness. The loop between writing code and running tests mirrors good human TDD practice.",
+    "source": "community",
+    "tags": ["agents", "tdd", "autonomous", "development-cycles", "advanced"]
+  },
+  {
+    "id": "agent-015",
+    "title": "Create Agents with Custom Memory Patterns",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Design agents that actively maintain their own memory files during execution, recording discoveries, decisions, and state. This allows long-running agents to resume or be inspected mid-task.",
+    "example": "# .claude/agents/long-running-refactorer.md\n---\nname: long-running-refactorer\ndescription: Refactors large codebases with persistent state\ntools: [Read, Write, Edit, Bash, Glob, Grep]\n---\n\nYou maintain a memory file at .claude/agents/memory/refactor-state.json.\n\n## Memory Structure\n```json\n{\n  \"started\": \"ISO timestamp\",\n  \"status\": \"in-progress|paused|complete\",\n  \"files_examined\": [],\n  \"files_modified\": [],\n  \"decisions\": [],\n  \"remaining_work\": []\n}\n```\n\n## On Start\n1. Check if memory file exists (resuming vs fresh start)\n2. If resuming: read state, continue from where you left off\n3. Update memory after each file processed",
+    "why": "Agents with persistent memory can handle tasks larger than a single context window. They self-document progress, enabling inspection and resumption — essential for large-scale refactors.",
+    "source": "community",
+    "tags": ["agents", "memory", "persistence", "long-running", "advanced"]
+  },
+  {
+    "id": "agent-016",
+    "title": "Tune Agent Performance with Targeted Tool Sets",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Profile which tools an agent actually uses and remove tools it never needs. Each unnecessary tool in the tool list increases token overhead and gives the agent more ways to go off-task.",
+    "example": "# Before optimization: overly broad tool set\n---\nname: changelog-writer\ntools: [Read, Write, Edit, Bash, Glob, Grep, WebSearch]  # Too broad\n---\n\n# After profiling: only what's needed\n---\nname: changelog-writer\ntools:\n  - Bash  # for `git log --oneline`\n  - Write # to write the CHANGELOG.md\ndescription: Generates CHANGELOG.md from git log\n---\n\n# This agent only needs git log output and a file write.\n# Grep, Glob, WebSearch are never used — remove them.",
+    "why": "Fewer tools means a smaller decision space for the agent. The agent spends less time considering tool choices and is less likely to reach for the wrong tool on ambiguous situations.",
+    "source": "community",
+    "tags": ["agents", "performance", "tool-optimization", "profiling", "advanced"]
+  },
+  {
+    "id": "agent-017",
+    "title": "Build Idempotent Agents for Safe Reruns",
+    "level": "advanced",
+    "category": "agents",
+    "tip": "Design agents so they can be run multiple times on the same codebase and produce the same result without duplicating work. Check for existing output before creating it and prefer upsert patterns over create-only.",
+    "example": "# System prompt for idempotent behavior:\n---\nname: openapi-generator\ndescription: Generates OpenAPI specs (idempotent — safe to rerun)\ntools: [Read, Write, Bash, Glob]\n---\n\nYou generate OpenAPI specs. You are idempotent — running you twice produces the same result.\n\n## Idempotency Rules\n1. Before writing a spec file, check if it already exists with Read\n2. If it exists and content matches expected output, skip (don't rewrite)\n3. If it exists but is outdated, update it (don't create a second file)\n4. If it doesn't exist, create it\n5. Never append to existing files — always overwrite with complete content\n\n## At End\nReport: N files created, M files updated, K files unchanged",
+    "why": "Idempotent agents are safe to run in CI, re-run after partial failures, and include in watch mode. Non-idempotent agents create duplicate work and files on rerun.",
+    "source": "community",
+    "tags": ["agents", "idempotency", "ci-cd", "reliability", "advanced"]
+  }
+]

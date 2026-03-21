@@ -1,0 +1,167 @@
+[
+  {
+    "id": "git-001",
+    "title": "Let Claude Create Commits with Conventional Format",
+    "level": "beginner",
+    "category": "git",
+    "tip": "When you finish a task with Claude, ask it to create the git commit. Claude will automatically stage relevant files, write a conventional commit message, and handle the commit — saving you the context-switch to think about commit messages.",
+    "example": "# After finishing a feature, just say:\n'Create a git commit for the changes we just made.'\n\n# Claude will:\n# 1. Run git status to see what changed\n# 2. Run git diff to understand the changes\n# 3. Stage the relevant files\n# 4. Write a conventional commit: feat(auth): add OAuth2 login with Google\n# 5. Create the commit\n\n# You can also be specific:\n'Commit the authentication changes with a conventional commit message.'",
+    "why": "Writing good commit messages requires context about what changed and why. Claude has that context from the conversation — you get well-written commits without the mental overhead.",
+    "source": "anthropic-docs",
+    "tags": ["git", "commits", "conventional-commits", "productivity"]
+  },
+  {
+    "id": "git-002",
+    "title": "Always Review the Diff Before Approving Commits",
+    "level": "beginner",
+    "category": "git",
+    "tip": "Before Claude commits, ask it to show you the full diff first. This is your last chance to catch unintended changes — debug code left in, commented-out code, or accidental file modifications.",
+    "example": "# Before committing, ask:\n'Show me the full diff of what you're about to commit.'\n\n# Or in a single workflow:\n'Review the diff, explain what changed and why, then create the commit if I approve.'\n\n# Red flags to watch for in the diff:\n# - console.log/print statements\n# - Commented-out code blocks\n# - .env or secrets files\n# - Changes to files you didn't intend to modify\n# - Large whitespace-only diffs",
+    "why": "AI can make changes you didn't explicitly request. A diff review catches accidental modifications and debug code before they enter your git history.",
+    "source": "anthropic-docs",
+    "tags": ["git", "diff", "review", "safety", "quality"]
+  },
+  {
+    "id": "git-003",
+    "title": "Ask Claude to Create Feature Branches",
+    "level": "beginner",
+    "category": "git",
+    "tip": "When starting a new feature or fix, ask Claude to create and check out a properly-named branch before making any changes. This keeps your work organized and makes PRs cleaner.",
+    "example": "# At the start of a new task:\n'Before we start, create a feature branch for implementing OAuth2 login.'\n\n# Claude creates:\ngit checkout -b feat/AUTH-123-oauth2-login\n\n# Or specify your convention:\n'Create a branch following our convention: type/ticket-description'\n# Claude: git checkout -b feat/AUTH-123-oauth2-google-login\n\n# Add to CLAUDE.md to make it automatic:\n## Git Workflow\nAlways create a feature branch before starting work.\nBranch format: type/TICKET-description (e.g., feat/AUTH-123-login)",
+    "why": "Branching before you start ensures work is isolated and reviewable. Claude creating the branch means naming is consistent with your conventions without manual formatting.",
+    "source": "anthropic-docs",
+    "tags": ["git", "branching", "workflow", "organization"]
+  },
+  {
+    "id": "git-004",
+    "title": "Use Claude for Pull Request Descriptions",
+    "level": "beginner",
+    "category": "git",
+    "tip": "Ask Claude to write your PR description using the git history and changes. Claude can summarize what changed, why, and how to test it — turning a chore into an instant deliverable.",
+    "example": "# Ask Claude to draft the PR:\n'Write a pull request description for these changes. Include:\n- What changed (summary of the implementation)\n- Why (the problem this solves)\n- How to test it (testing steps)\n- Any breaking changes'\n\n# Claude will run git log and git diff to build context, then produce:\n## Summary\nImplements OAuth2 Google login to replace email/password auth.\n\n## Problem\nUsers requested social login (#123). Email auth had high abandonment.\n\n## Testing\n1. Click 'Login with Google' on /login\n2. Authorize the app\n3. Verify redirect to /dashboard with user profile...",
+    "why": "PR descriptions are often neglected because they're written after you've mentally moved on. Claude writes them in seconds with full context from the git history.",
+    "source": "anthropic-docs",
+    "tags": ["git", "pull-requests", "documentation", "productivity"]
+  },
+  {
+    "id": "git-005",
+    "title": "Ask Claude to Explain Changes Before Committing",
+    "level": "beginner",
+    "category": "git",
+    "tip": "Before committing, ask Claude to walk through the changes it made. This serves as a built-in code review, catching issues and helping you understand the implementation.",
+    "example": "# After a task, before committing:\n'Walk me through all the changes you made, file by file. Explain:\n- What you changed in each file\n- Why you made that change\n- Any tradeoffs or assumptions you made'\n\n# Claude explains, then:\n'Any questions or changes? If it all looks good, commit it.'",
+    "why": "Asking Claude to explain its changes surfaces assumptions and tradeoffs you can then approve or correct. It's a lightweight review that catches issues before they hit the PR.",
+    "source": "community",
+    "tags": ["git", "review", "explanation", "quality", "understanding"]
+  },
+  {
+    "id": "git-006",
+    "title": "Use Git Worktrees for Parallel Claude Tasks",
+    "level": "intermediate",
+    "category": "git",
+    "tip": "Git worktrees allow multiple working directories from the same repository. Use them to run parallel Claude sessions on different features simultaneously without branch switching.",
+    "example": "# Create worktrees for parallel work:\ngit worktree add ../myapp-auth feature/auth\ngit worktree add ../myapp-payments feature/payments\n\n# Open separate Claude Code sessions in each:\n# Terminal 1: cd ../myapp-auth && claude\n# Terminal 2: cd ../myapp-payments && claude\n\n# Each Claude session works on its own branch independently\n# No need to stash or switch branches\n\n# When done, merge and clean up:\ngit worktree remove ../myapp-auth\ngit worktree remove ../myapp-payments",
+    "why": "Without worktrees, parallel Claude sessions on the same repo create file conflicts and require constant branch switching. Worktrees give each session its own clean workspace.",
+    "source": "anthropic-docs",
+    "tags": ["git", "worktrees", "parallel-work", "productivity", "intermediate"]
+  },
+  {
+    "id": "git-007",
+    "title": "Ask Claude to Make Atomic Commits",
+    "level": "intermediate",
+    "category": "git",
+    "tip": "Instruct Claude to create atomic commits — one logical change per commit. If Claude makes multiple unrelated changes, ask it to split them into separate commits before pushing.",
+    "example": "# In CLAUDE.md or as a direct instruction:\n## Git Practices\nCreate atomic commits — one logical change per commit.\nIf you've made multiple unrelated changes, create separate commits.\nNever mix feature changes with formatting fixes in one commit.\n\n# If Claude has mixed changes, ask:\n'You made changes to both the auth module and the database schema.\nThese should be separate commits. Please split them.'\n\n# Claude will use git add -p or individual file staging to separate commits.",
+    "why": "Atomic commits make git bisect effective, cherry-picking safe, and code review cleaner. Mixed commits make rollbacks dangerous — rolling back one change means rolling back all of them.",
+    "source": "anthropic-docs",
+    "tags": ["git", "atomic-commits", "best-practices", "intermediate"]
+  },
+  {
+    "id": "git-008",
+    "title": "Create PR Templates Claude Will Follow",
+    "level": "intermediate",
+    "category": "git",
+    "tip": "Create a .github/pull_request_template.md file and tell Claude about it in CLAUDE.md. Claude will automatically use the template structure when writing PR descriptions.",
+    "example": "# .github/pull_request_template.md\n## Summary\n<!-- What does this PR do? -->\n\n## Motivation\n<!-- Why is this change needed? -->\n\n## Changes\n- \n\n## Testing\n- [ ] Unit tests pass\n- [ ] Integration tests pass\n- [ ] Manual testing completed\n\n## Screenshots (if applicable)\n\n# In CLAUDE.md:\n## Pull Requests\nWhen creating PR descriptions, follow the template at .github/pull_request_template.md.",
+    "why": "PR templates enforce completeness. When Claude knows the template, it fills all sections with actual content — not just headings with 'TODO: fill this in'.",
+    "source": "community",
+    "tags": ["git", "pull-requests", "templates", "team", "intermediate"]
+  },
+  {
+    "id": "git-009",
+    "title": "Use Claude to Resolve Merge Conflicts",
+    "level": "intermediate",
+    "category": "git",
+    "tip": "When you have merge conflicts, show Claude the conflicted files and ask it to resolve them. Claude understands the semantic intent of both changes and can merge them correctly, not just pick one side.",
+    "example": "# Share the conflict:\n'We have a merge conflict in src/auth/user-service.ts.\nHere are the two versions. Resolve the conflict by:\n- Keeping the JWT implementation from the feature branch\n- Incorporating the error handling improvements from main\nDon't just pick one side — merge the intent of both changes.'\n\n# Claude reads both versions, understands them semantically,\n# and writes a merged version that incorporates both changes correctly.",
+    "why": "Mechanical conflict resolution (picking one side) often loses valid improvements. Claude's semantic understanding means it merges intent, not just text.",
+    "source": "community",
+    "tags": ["git", "merge-conflicts", "resolution", "intermediate"]
+  },
+  {
+    "id": "git-010",
+    "title": "Define Commit Conventions in CLAUDE.md",
+    "level": "intermediate",
+    "category": "git",
+    "tip": "Specify your exact commit message format in CLAUDE.md so all commits Claude creates match your team's conventions automatically. Include examples of good and bad commit messages.",
+    "example": "## Commit Conventions\nUse Conventional Commits format:\n\nFormat: type(scope): subject\n\nTypes: feat, fix, docs, style, refactor, test, chore\nScope: auth, payments, api, ui, db, infra\nSubject: imperative mood, lowercase, no period, max 72 chars\n\n### Good Examples\n- feat(auth): add OAuth2 Google login\n- fix(payments): handle Stripe webhook retry correctly\n- refactor(db): extract query builder to separate module\n\n### Bad Examples (never do these)\n- 'Updated stuff'\n- 'WIP'\n- 'fixes' (not imperative)\n- 'feat: Add new feature for authentication and also fix a bug in payments' (too long, mixed scope)",
+    "why": "Consistent commit history is essential for automation (changelogs, semantic versioning) and team readability. Defining conventions in CLAUDE.md ensures Claude always follows them.",
+    "source": "community",
+    "tags": ["git", "commit-conventions", "conventional-commits", "team", "claude.md"]
+  },
+  {
+    "id": "git-011",
+    "title": "Run Claude Agents Across Worktrees for Feature Parallelism",
+    "level": "advanced",
+    "category": "git",
+    "tip": "Combine git worktrees with Claude agents to implement multiple features simultaneously. An orchestrating Claude session creates worktrees, assigns agents to each, and merges results when done.",
+    "example": "# Orchestrator prompt:\n'I need to implement 3 independent features. Use this workflow:\n\n1. Create worktrees:\n   git worktree add ../app-feat1 feature/user-profiles\n   git worktree add ../app-feat2 feature/notification-system\n   git worktree add ../app-feat3 feature/analytics-dashboard\n\n2. Spawn agents in parallel — one per worktree:\n   - Agent 1 in ../app-feat1: implement user profile editing\n   - Agent 2 in ../app-feat2: implement email notifications\n   - Agent 3 in ../app-feat3: implement basic analytics\n\n3. Wait for all agents to complete\n4. Report any failures\n5. Push all branches'",
+    "why": "Sequential feature development leaves compute idle. Parallel agents in separate worktrees can implement 3 features in the time it takes to implement 1, with no risk of conflicts.",
+    "source": "community",
+    "tags": ["git", "worktrees", "agents", "parallel", "advanced"]
+  },
+  {
+    "id": "git-012",
+    "title": "Use Git Hooks with Claude Hooks for Automated Quality Gates",
+    "level": "advanced",
+    "category": "git",
+    "tip": "Combine Claude Code hooks (PreToolUse) with git hooks (pre-commit) to create multi-layer quality enforcement. Claude hooks validate before writing, git hooks validate before committing.",
+    "example": "# .husky/pre-commit (git hook — runs on every commit)\n#!/bin/sh\nnpx tsc --noEmit && npm run lint && npm test\n\n# .claude/hooks/pre-write-check.sh (Claude hook — runs before writes)\n#!/bin/bash\n# Check file size limits (prevent accidentally writing large generated files)\nFILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty')\nCONTENT=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.content // empty')\nLINES=$(echo \"$CONTENT\" | wc -l)\nif [[ $LINES -gt 500 ]]; then\n  echo \"File exceeds 500 line limit: $FILE has $LINES lines\" >&2\n  exit 2\nfi\n\n# Result: Catch problems at write time (Claude hook) AND commit time (git hook)",
+    "why": "Dual-layer validation catches issues earlier (at write time, not commit time) while git hooks provide a final safety net that works regardless of how files were created.",
+    "source": "community",
+    "tags": ["git", "hooks", "quality-gates", "automation", "advanced"]
+  },
+  {
+    "id": "git-013",
+    "title": "Build Automated PR Review Workflows",
+    "level": "advanced",
+    "category": "git",
+    "tip": "Create a custom command or agent that performs a structured code review of a PR using git diff against the base branch. The agent checks for specific concerns and formats output as actionable review comments.",
+    "example": "# .claude/commands/review-pr.md\n---\ndescription: Perform a comprehensive code review of current branch changes\n---\nReview the changes in this branch against main:\n\n1. Run: `git diff main...HEAD` to see all changes\n2. Review for:\n   - Security vulnerabilities (SQL injection, XSS, auth bypass)\n   - Performance issues (N+1 queries, unnecessary loops)\n   - Missing error handling\n   - Test coverage gaps\n   - Breaking API changes\n3. Format output as GitHub review comments:\n   **File: src/auth/login.ts, Line 45**\n   Issue: SQL query uses string interpolation — SQL injection risk\n   Suggestion: Use parameterized query: `db.query('SELECT * FROM users WHERE id = ?', [userId])`",
+    "why": "Automated PR review catches common issues before human reviewers spend time on them. It's especially effective at finding security patterns and missing error handling that are easy to overlook.",
+    "source": "community",
+    "tags": ["git", "pr-review", "automation", "code-quality", "advanced"]
+  },
+  {
+    "id": "git-014",
+    "title": "Use Claude for Interactive Rebase Planning",
+    "level": "advanced",
+    "category": "git",
+    "tip": "Before an interactive rebase, ask Claude to analyze your commit history and recommend a rebase strategy — which commits to squash, reorder, or reword — then execute the rebase based on the plan.",
+    "example": "# Ask Claude to analyze:\n'Look at the last 8 commits with `git log --oneline -8`.\nRecommend a rebase strategy to:\n- Squash WIP commits\n- Group related changes\n- Fix commit messages that don't follow our conventions\nProvide the rebase plan as a list before I approve it.'\n\n# Claude responds:\n# 'Here's my recommended rebase plan:\n# 1. Keep: feat(auth): add OAuth2 Google login\n# 2. Squash into above: fix typo in oauth handler\n# 3. Keep: test(auth): add OAuth2 integration tests\n# 4. Reword: 'WIP payments' -> 'feat(payments): begin Stripe integration'\n# Approve this plan?'\n\n# After approval, Claude executes the rebase",
+    "why": "Interactive rebases are powerful but risky without planning. Claude's analysis gives you a review step before executing, preventing accidental loss of commits.",
+    "source": "community",
+    "tags": ["git", "rebase", "history-cleanup", "advanced", "workflow"]
+  },
+  {
+    "id": "git-015",
+    "title": "Configure Claude for Monorepo Git Workflows",
+    "level": "advanced",
+    "category": "git",
+    "tip": "In monorepos, configure CLAUDE.md with scope conventions so Claude's commits always identify which package changed. Include instructions for running package-specific tests rather than the full test suite.",
+    "example": "# In ./CLAUDE.md (monorepo root):\n## Monorepo Git Conventions\n\n### Commit Scopes\nAlways scope commits to the package that changed:\n- `feat(api): ...` for packages/api changes\n- `feat(web): ...` for packages/web changes\n- `feat(shared): ...` for packages/shared changes\n- `chore(root): ...` for root-level config changes\n\n### Testing Before Commit\nRun only the affected package's tests:\n- `cd packages/api && npm test` for api changes\n- `cd packages/web && npm test` for web changes\n- `turbo run test --filter=[HEAD^1]` for changed packages only\n\n### Never run `npm test` at root — it's too slow.",
+    "why": "Monorepo commits without scope information make it impossible to know which package a change affects. Package-specific test runs keep CI fast by only testing what changed.",
+    "source": "community",
+    "tags": ["git", "monorepo", "conventions", "advanced", "ci-cd"]
+  }
+]

@@ -1,0 +1,145 @@
+{
+  "category": "git",
+  "questions": [
+    {
+      "id": "git-q1",
+      "difficulty": "beginner",
+      "question": "What is a git worktree, and what problem does it solve for Claude Code users?",
+      "options": [
+        "A) A worktree is a visual diff viewer built into git for comparing branches",
+        "B) A worktree is an additional working directory linked to the same repository, allowing multiple branches to be checked out simultaneously without stashing or switching",
+        "C) A worktree is a git plugin that automatically resolves merge conflicts using AI",
+        "D) A worktree is a cached copy of the repository stored on a remote server"
+      ],
+      "correct": "B",
+      "explanation": "Git worktrees allow you to check out multiple branches from the same repository into separate directories at the same time. For Claude Code users running parallel tasks (e.g., a feature branch and a hotfix branch simultaneously), worktrees eliminate the need to stash, switch, and restore state. Each worktree has its own working directory but shares the same .git object store.",
+      "tip_ref": "git-001"
+    },
+    {
+      "id": "git-q2",
+      "difficulty": "beginner",
+      "question": "In conventional commits, what does the prefix 'feat:' signify?",
+      "options": [
+        "A) A fix for a bug that was introduced in a previous feature commit",
+        "B) A new feature being added to the codebase",
+        "C) A performance improvement or optimization",
+        "D) A commit that modifies feature flag configuration"
+      ],
+      "correct": "B",
+      "explanation": "The conventional commits specification defines standard prefixes: 'feat:' for new features, 'fix:' for bug fixes, 'docs:' for documentation changes, 'refactor:' for code restructuring without behavior change, 'test:' for test additions/changes, and 'chore:' for maintenance tasks. Using 'feat:' on a commit triggers a MINOR version bump in semantic versioning toolchains.",
+      "tip_ref": "git-002"
+    },
+    {
+      "id": "git-q3",
+      "difficulty": "beginner",
+      "question": "What is an 'atomic commit' in git best practices?",
+      "options": [
+        "A) A commit that is cryptographically signed and cannot be altered",
+        "B) A commit that is automatically created by CI/CD pipelines",
+        "C) A commit that contains exactly one logical change — complete and self-contained — so it can be understood, reviewed, or reverted in isolation",
+        "D) A commit that touches only a single file"
+      ],
+      "correct": "C",
+      "explanation": "An atomic commit captures one logical, complete unit of work. It should be reviewable on its own (the reader understands what changed and why), buildable on its own (the code compiles and tests pass at that commit), and revertable on its own (reverting it undoes exactly that change without unrelated side effects). 'One file' is not the right definition — a logical change often spans multiple files.",
+      "tip_ref": "git-003"
+    },
+    {
+      "id": "git-q4",
+      "difficulty": "intermediate",
+      "question": "When should you use 'git rebase' versus 'git merge' when integrating a feature branch into main?",
+      "options": [
+        "A) Always use rebase; merge is deprecated in modern git workflows",
+        "B) Use rebase to produce a linear, clean history on local/private branches before merging; use merge to preserve the full history of shared/public branches",
+        "C) Use merge for small changes and rebase for large changes with many commits",
+        "D) Rebase and merge produce identical results; the choice is purely aesthetic"
+      ],
+      "correct": "B",
+      "explanation": "Rebase rewrites commit history to create a linear sequence — ideal for cleaning up local work-in-progress commits before sharing. However, rebasing shared/public branches that others have based work on rewrites history they depend on, causing divergence and confusion. The golden rule: never rebase commits that have been pushed to a shared branch. Merge preserves the full branching and merging history, which is important for auditing long-lived integrations.",
+      "tip_ref": "git-004"
+    },
+    {
+      "id": "git-q5",
+      "difficulty": "intermediate",
+      "question": "Which .gitignore pattern correctly ignores all .env files anywhere in the repository tree, including nested subdirectories?",
+      "options": [
+        "A) .env",
+        "B) /.env",
+        "C) **/.env",
+        "D) *.env/"
+      ],
+      "correct": "C",
+      "explanation": "The pattern '**/.env' uses the double-star glob to match .env files at any depth in the directory tree. The pattern '.env' (without a leading slash) actually also matches recursively in git, but '**/.env' is more explicit and readable. '/.env' only matches at the root. '*.env/' would incorrectly match directories ending in .env rather than files named .env.",
+      "tip_ref": "git-005"
+    },
+    {
+      "id": "git-q6",
+      "difficulty": "intermediate",
+      "question": "What is the correct workflow when Claude Code encounters a merge conflict during a git operation?",
+      "options": [
+        "A) Always accept the incoming changes ('theirs') since they are more recent",
+        "B) Always accept the current branch changes ('ours') to preserve local work",
+        "C) Stop, present both versions to the user with context, and ask for guidance on the intended resolution",
+        "D) Automatically attempt to merge both versions by concatenating the conflicting sections"
+      ],
+      "correct": "C",
+      "explanation": "Merge conflicts require semantic understanding of intent — knowing which version is 'correct' requires understanding the business logic, not just the text. Claude Code should not silently choose one side or blindly concatenate both. The right approach is to surface the conflict clearly, explain both versions, and let the developer make an informed decision. Automated conflict resolution that doesn't understand intent causes subtle bugs.",
+      "tip_ref": "git-006"
+    },
+    {
+      "id": "git-q7",
+      "difficulty": "intermediate",
+      "question": "How do git hooks integrate with Claude Code's hook system?",
+      "options": [
+        "A) Claude Code completely replaces git hooks; you should remove .git/hooks files when using Claude",
+        "B) Git hooks (pre-commit, post-commit, etc.) run independently of Claude Code hooks; they can complement each other — git hooks guard the repo, Claude Code hooks guard Claude's actions",
+        "C) Claude Code hooks automatically convert to git hooks stored in .git/hooks",
+        "D) Git hooks and Claude Code hooks use the same configuration file and are interchangeable"
+      ],
+      "correct": "B",
+      "explanation": "Git hooks and Claude Code hooks are independent systems that serve different layers. Git hooks (pre-commit, commit-msg, pre-push) guard the git repository's integrity — linting, formatting, test running. Claude Code hooks (PreToolUse, PostToolUse) guard what Claude is allowed to do during a session. They work at complementary layers and can coexist: git hooks protect the commit layer, Claude Code hooks protect the agentic action layer.",
+      "tip_ref": "git-007"
+    },
+    {
+      "id": "git-q8",
+      "difficulty": "advanced",
+      "question": "A team uses Claude Code to generate commits. They want to enforce that every Claude-generated commit follows conventional commit format. What is the most robust implementation?",
+      "options": [
+        "A) Add an instruction to CLAUDE.md asking Claude to use conventional commit format",
+        "B) Rely on Claude's default behavior, which already follows conventional commits",
+        "C) Implement a commit-msg git hook that validates the format using a regex, causing the commit to fail if Claude generates a non-conforming message",
+        "D) Use a PostToolUse hook to edit the commit message after Claude creates it"
+      ],
+      "correct": "C",
+      "explanation": "A commit-msg git hook that validates against the conventional commit regex ('(feat|fix|docs|...)(scope)?: description') is a hard enforcement mechanism — if the message fails validation, the commit is rejected and Claude must try again. CLAUDE.md instructions are a soft hint that can be forgotten. Git hooks are the right enforcement layer because they are part of the repository and enforce the constraint at the git level regardless of how the commit was initiated.",
+      "tip_ref": "git-008"
+    },
+    {
+      "id": "git-q9",
+      "difficulty": "advanced",
+      "question": "What is the benefit of using git worktrees specifically when running multiple Claude Code agents in parallel on the same repository?",
+      "options": [
+        "A) Worktrees make git operations 10x faster by enabling parallel I/O",
+        "B) Each agent operates in its own worktree (separate directory and branch), preventing file system conflicts when multiple agents modify files concurrently",
+        "C) Worktrees give each agent its own separate git history that can be merged later",
+        "D) Worktrees encrypt each agent's changes so other agents cannot read them"
+      ],
+      "correct": "B",
+      "explanation": "When multiple agents work on the same repository simultaneously, they risk stepping on each other's file system changes. Git worktrees solve this by giving each agent a completely separate working directory checked out to its own branch. Agent A modifying files in /repo-worktree-feature does not affect Agent B working in /repo-worktree-bugfix. Changes are only integrated via explicit git merges or rebases when the developer is ready.",
+      "tip_ref": "git-009"
+    },
+    {
+      "id": "git-q10",
+      "difficulty": "advanced",
+      "question": "A developer asks Claude to 'clean up the git history before the PR review.' What is the safest interpretation and approach?",
+      "options": [
+        "A) Run 'git reset --hard origin/main' to start fresh with a single commit",
+        "B) Force push the branch with amended commits to overwrite the remote history",
+        "C) Clarify with the developer what 'clean up' means, then use interactive rebase on the local branch (squashing WIP commits, fixing messages) before the branch has been reviewed by others",
+        "D) Delete and recreate the branch with a single squash commit of all changes"
+      ],
+      "correct": "C",
+      "explanation": "History rewriting (interactive rebase, squash) is safe on a local or personal branch that others have not yet based work on. Claude should first clarify the intent (squash WIP commits? fix typos in messages? combine tiny commits?), then perform the rebase locally. Force pushing to a shared branch risks disrupting collaborators. Resetting hard or deleting/recreating the branch risks data loss. Clarification before destructive operations is essential.",
+      "tip_ref": "git-010"
+    }
+  ]
+}

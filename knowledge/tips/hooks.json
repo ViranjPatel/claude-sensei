@@ -1,0 +1,178 @@
+[
+  {
+    "id": "hooks-001",
+    "title": "Understand What Hooks Are and When They Fire",
+    "level": "beginner",
+    "category": "hooks",
+    "tip": "Hooks are shell commands that Claude Code executes automatically at specific lifecycle points. There are four hook types: PreToolUse (before a tool runs), PostToolUse (after a tool runs), Notification (when Claude sends a notification), and Stop (when Claude finishes a response).",
+    "example": "# Hook lifecycle:\n# 1. You send a message\n# 2. Claude decides to use a tool (e.g., Bash)\n# 3. PreToolUse hook fires — can inspect or block the tool call\n# 4. Tool executes\n# 5. PostToolUse hook fires — can inspect results or trigger side effects\n# 6. Claude finishes responding\n# 7. Stop hook fires — can trigger notifications or cleanup\n\n# Hooks are defined in .claude/settings.json",
+    "why": "Knowing when hooks fire lets you choose the right hook type for your automation. PreToolUse is for guardrails, PostToolUse is for side effects, Stop is for notifications.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "lifecycle", "basics", "fundamentals"]
+  },
+  {
+    "id": "hooks-002",
+    "title": "Write Your First PreToolUse Hook",
+    "level": "beginner",
+    "category": "hooks",
+    "tip": "A PreToolUse hook runs before Claude executes a tool. The simplest use case is logging what Claude is about to do. Hook scripts receive tool information via the CLAUDE_TOOL_INPUT environment variable as JSON.",
+    "example": "# .claude/hooks/log-tools.sh\n#!/bin/bash\nTOOL=\"$CLAUDE_TOOL_NAME\"\nINPUT=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -c '.')\necho \"[$(date +%H:%M:%S)] Tool: $TOOL | Input: $INPUT\" >> .claude/tool-log.txt\n# Exit 0 = allow the tool to proceed\nexit 0\n\n# .claude/settings.json\n{\n  \"hooks\": {\n    \"PreToolUse\": [{\n      \"matcher\": \"\",\n      \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/log-tools.sh\"}]\n    }]\n  }\n}",
+    "why": "A logging hook is the perfect first hook — it's safe (always exits 0), immediately useful, and teaches you the hook input format before you write hooks that affect behavior.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "preToolUse", "logging", "beginner", "first-hook"]
+  },
+  {
+    "id": "hooks-003",
+    "title": "Use PostToolUse Hooks for Side Effects",
+    "level": "beginner",
+    "category": "hooks",
+    "tip": "PostToolUse hooks fire after a tool completes and receive both the input and output. Use them to trigger side effects: format code after writes, run tests after edits, or log results.",
+    "example": "# Auto-format TypeScript files after Claude writes them\n# .claude/hooks/format-on-write.sh\n#!/bin/bash\nFILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty')\nif [[ \"$FILE\" == *.ts || \"$FILE\" == *.tsx ]]; then\n  npx prettier --write \"$FILE\" 2>/dev/null\n  echo \"Formatted: $FILE\"\nfi\nexit 0\n\n# .claude/settings.json\n{\n  \"hooks\": {\n    \"PostToolUse\": [{\n      \"matcher\": \"Write\",\n      \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/format-on-write.sh\"}]\n    }]\n  }\n}",
+    "why": "PostToolUse hooks let you enforce code quality automatically. Claude writes a file, Prettier formats it instantly — you always get clean code without a separate format step.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "postToolUse", "formatting", "side-effects", "automation"]
+  },
+  {
+    "id": "hooks-004",
+    "title": "Control Tool Execution with Exit Codes",
+    "level": "beginner",
+    "category": "hooks",
+    "tip": "PreToolUse hooks use exit codes to control whether a tool proceeds. Exit 0 allows the tool. Exit 2 blocks the tool and sends your stderr output back to Claude as a message, letting Claude adjust its approach.",
+    "example": "# Block any attempt to delete files in ./src/critical/\n# .claude/hooks/protect-critical.sh\n#!/bin/bash\nCOMMAND=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command // empty')\nif echo \"$COMMAND\" | grep -qE '(rm|del|unlink).*src/critical'; then\n  echo \"BLOCKED: The src/critical/ directory is read-only. Use archiving instead.\" >&2\n  exit 2  # Exit 2 = block and tell Claude why\nfi\nexit 0   # Exit 0 = allow",
+    "why": "Exit code 2 creates a feedback loop — Claude receives your block message and can try a different approach. It's not just a hard stop; it's a redirection.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "exit-codes", "blocking", "control-flow"]
+  },
+  {
+    "id": "hooks-005",
+    "title": "Use Matchers to Target Specific Tools",
+    "level": "beginner",
+    "category": "hooks",
+    "tip": "The 'matcher' field in hook configuration lets you target specific tools instead of running your hook on every tool call. Use exact tool names like 'Bash', 'Write', 'Edit' or leave it empty to match all tools.",
+    "example": "# .claude/settings.json — targeted hooks\n{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"Bash\",\n        \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/validate-bash.sh\"}]\n      },\n      {\n        \"matcher\": \"Write\",\n        \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/validate-write.sh\"}]\n      }\n    ],\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write\",\n        \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/format-on-write.sh\"}]\n      }\n    ]\n  }\n}",
+    "why": "Targeted hooks are faster and more maintainable. A hook that only runs on Bash calls doesn't need to handle Write inputs — each hook can be simple and focused.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "matchers", "targeting", "configuration"]
+  },
+  {
+    "id": "hooks-006",
+    "title": "Build Prompt-Based Hooks for Flexible Validation",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "Instead of brittle regex/string matching, use a second Claude invocation inside your hook to intelligently evaluate whether a tool call should be allowed. This creates AI-powered guardrails.",
+    "example": "# .claude/hooks/smart-bash-check.sh\n#!/bin/bash\nCOMMAND=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command')\n\n# Ask Claude to evaluate the command\nRESPONSE=$(echo \"Is this bash command safe to run in a development project? Answer only SAFE or UNSAFE and a one-line reason: $COMMAND\" | \\\n  claude --model claude-haiku-3-5 --print 2>/dev/null)\n\nif echo \"$RESPONSE\" | grep -q \"^UNSAFE\"; then\n  echo \"Hook blocked: $RESPONSE\" >&2\n  exit 2\nfi\nexit 0",
+    "why": "Regex-based hooks break on edge cases and require maintenance as patterns grow. A prompt-based hook understands intent and context, catching issues simple pattern matching would miss.",
+    "source": "community",
+    "tags": ["hooks", "prompt-based", "ai-guardrails", "advanced-hooks", "intermediate"]
+  },
+  {
+    "id": "hooks-007",
+    "title": "Block Sensitive File Access with PreToolUse",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "Use PreToolUse hooks to prevent Claude from reading or writing files that contain secrets, credentials, or other sensitive data. Define a blocklist of sensitive file patterns.",
+    "example": "# .claude/hooks/protect-secrets.sh\n#!/bin/bash\nINPUT=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.')\n\n# Check file paths in Write, Edit, and Read tools\nFILE_PATH=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // .path // empty')\n\nSENSITIVE_PATTERNS=(\".env\" \".env.local\" \".env.production\" \"secrets.json\" \"*.pem\" \"*_rsa\")\n\nfor pattern in \"${SENSITIVE_PATTERNS[@]}\"; do\n  if [[ \"$FILE_PATH\" == $pattern ]]; then\n    echo \"BLOCKED: $FILE_PATH matches sensitive file pattern '$pattern'\" >&2\n    exit 2\n  fi\ndone\nexit 0",
+    "why": "Even trustworthy AI can accidentally include secret values in output or logs. A hook-level block ensures secrets never enter the conversation regardless of the task.",
+    "source": "community",
+    "tags": ["hooks", "security", "secrets", "file-protection"]
+  },
+  {
+    "id": "hooks-008",
+    "title": "Debug Hooks with Verbose Logging",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "When a hook isn't behaving as expected, add verbose logging to trace its execution. Log the full tool input, intermediate values, and exit path to a debug file.",
+    "example": "# .claude/hooks/debug-hook.sh\n#!/bin/bash\nDEBUG_LOG=\".claude/debug/hook-$(date +%Y%m%d).log\"\nmkdir -p .claude/debug\n\necho \"=== $(date +%T) ===\"           >> \"$DEBUG_LOG\"\necho \"Tool: $CLAUDE_TOOL_NAME\"        >> \"$DEBUG_LOG\"\necho \"Input: $CLAUDE_TOOL_INPUT\"      >> \"$DEBUG_LOG\"\n\n# Your hook logic here\nCOMMAND=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command // empty')\necho \"Parsed command: [$COMMAND]\"     >> \"$DEBUG_LOG\"\n\nif [[ -z \"$COMMAND\" ]]; then\n  echo \"Exit: 0 (no command)\"         >> \"$DEBUG_LOG\"\n  exit 0\nfi\n\necho \"Exit: 0 (allowed)\"              >> \"$DEBUG_LOG\"\nexit 0",
+    "why": "Hooks run silently by default. Without explicit logging, debugging is guesswork. A debug log lets you replay exactly what the hook saw and decided on each invocation.",
+    "source": "community",
+    "tags": ["hooks", "debugging", "logging", "troubleshooting"]
+  },
+  {
+    "id": "hooks-009",
+    "title": "Pass Environment Variables to Hook Scripts",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "Hooks inherit the environment variables from the Claude Code process. You can also define additional env vars in settings.json. Use this to configure hooks for different environments (dev/staging/prod).",
+    "example": "# .claude/settings.json\n{\n  \"env\": {\n    \"HOOK_STRICT_MODE\": \"true\",\n    \"PROTECTED_DIRS\": \"src/core,src/auth,src/payments\",\n    \"SLACK_WEBHOOK_URL\": \"https://hooks.slack.com/...\"\n  },\n  \"hooks\": {\n    \"PreToolUse\": [{\n      \"matcher\": \"Bash\",\n      \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/env-aware-hook.sh\"}]\n    }]\n  }\n}\n\n# .claude/hooks/env-aware-hook.sh\n#!/bin/bash\nif [[ \"$HOOK_STRICT_MODE\" == \"true\" ]]; then\n  # Apply stricter rules in strict mode\n  echo \"Strict mode enabled\" >> .claude/hook-log.txt\nfi",
+    "why": "Environment variables make hooks configurable without editing the script. The same hook script can behave differently in dev and CI by changing env vars.",
+    "source": "anthropic-docs",
+    "tags": ["hooks", "environment-variables", "configuration", "flexibility"]
+  },
+  {
+    "id": "hooks-010",
+    "title": "Combine Multiple Hooks for Defense in Depth",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "Stack multiple hooks on the same tool event to separate concerns. One hook validates security, another logs the action, a third enforces code style. Each hook is single-purpose and composable.",
+    "example": "# .claude/settings.json — multiple hooks on Write\n{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"Write\",\n        \"hooks\": [\n          {\"type\": \"command\", \"command\": \"bash .claude/hooks/check-file-permissions.sh\"},\n          {\"type\": \"command\", \"command\": \"bash .claude/hooks/check-secrets-in-content.sh\"},\n          {\"type\": \"command\", \"command\": \"bash .claude/hooks/log-write.sh\"}\n        ]\n      }\n    ]\n  }\n}",
+    "why": "Single-responsibility hooks are easier to test, debug, and maintain. If security validation breaks, logging still works. You can add/remove individual hooks without rewriting a monolithic script.",
+    "source": "community",
+    "tags": ["hooks", "composition", "defense-in-depth", "architecture"]
+  },
+  {
+    "id": "hooks-011",
+    "title": "Use the Stop Hook for Session Notifications",
+    "level": "intermediate",
+    "category": "hooks",
+    "tip": "The Stop hook fires when Claude finishes responding. Use it to send notifications when long-running tasks complete, so you can step away and be pinged when Claude is done.",
+    "example": "# .claude/hooks/notify-done.sh\n#!/bin/bash\n# Send macOS notification when Claude finishes\nosascript -e 'display notification \"Claude has finished\" with title \"Claude Code\" sound name \"Glass\"'\n\n# Or send a Slack message:\ncurl -s -X POST \"$SLACK_WEBHOOK_URL\" \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"text\":\"Claude Code task completed in '\"$PWD\"'\"}'\n\n# .claude/settings.json\n{\n  \"hooks\": {\n    \"Stop\": [{\n      \"hooks\": [{\"type\": \"command\", \"command\": \"bash .claude/hooks/notify-done.sh\"}]\n    }]\n  }\n}",
+    "why": "Long agentic tasks can take minutes. A Stop notification frees you to work on other things and return only when Claude needs input, rather than staring at the terminal.",
+    "source": "community",
+    "tags": ["hooks", "stop-hook", "notifications", "productivity"]
+  },
+  {
+    "id": "hooks-012",
+    "title": "Orchestrate Multi-Hook Pipelines for Complex Workflows",
+    "level": "advanced",
+    "category": "hooks",
+    "tip": "Build hook pipelines where each hook passes data to the next via shared files or environment variables. This enables complex validation workflows: fetch → analyze → decide → log.",
+    "example": "# Pipeline: validate bash commands through 3 stages\n# Stage 1: extract and normalize command\n# Stage 2: check against allowlist\n# Stage 3: risk-score and decide\n\n# .claude/hooks/pipeline/01-extract.sh\n#!/bin/bash\nCMD=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command')\necho \"$CMD\" > /tmp/claude-hook-cmd.txt\necho \"$CLAUDE_TOOL_NAME\" > /tmp/claude-hook-tool.txt\nexit 0\n\n# .claude/hooks/pipeline/02-allowlist.sh  \n#!/bin/bash\nCMD=$(cat /tmp/claude-hook-cmd.txt)\n# ... allowlist check ...\nexit 0\n\n# .claude/hooks/pipeline/03-risk-score.sh\n#!/bin/bash\nCMD=$(cat /tmp/claude-hook-cmd.txt)\nRISK=$(calculate_risk \"$CMD\")  # custom logic\n[[ $RISK -gt 8 ]] && { echo \"High-risk command blocked: $CMD\" >&2; exit 2; }\nexit 0",
+    "why": "Pipelines split complex logic into testable stages. You can unit-test each stage independently and add/remove stages without touching others.",
+    "source": "community",
+    "tags": ["hooks", "pipelines", "orchestration", "advanced", "architecture"]
+  },
+  {
+    "id": "hooks-013",
+    "title": "Write Conditional Hooks Based on Project State",
+    "level": "advanced",
+    "category": "hooks",
+    "tip": "Hooks can inspect project state (git status, environment files, CI indicators) to apply different rules in different contexts. A hook can be strict in CI and permissive locally.",
+    "example": "# .claude/hooks/context-aware-guard.sh\n#!/bin/bash\n# Apply different rules based on context\n\n# Detect CI environment\nif [[ -n \"$CI\" || -n \"$GITHUB_ACTIONS\" ]]; then\n  # CI: strict mode — block any direct DB commands\n  CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command // empty')\n  if echo \"$CMD\" | grep -qiE '(psql|mysql|mongo|redis-cli)'; then\n    echo \"CI: Direct database access blocked. Use migration files.\" >&2\n    exit 2\n  fi\nfi\n\n# Detect production branch\nBRANCH=$(git branch --show-current 2>/dev/null)\nif [[ \"$BRANCH\" == \"main\" || \"$BRANCH\" == \"production\" ]]; then\n  echo \"WARNING: On production branch. Requiring confirmation for writes.\" >&2\n  # Could exit 2 to block and require explicit override\nfi\nexit 0",
+    "why": "One-size-fits-all hooks create friction in development while leaving gaps in sensitive environments. Context-aware hooks tighten when it matters and relax when it doesn't.",
+    "source": "community",
+    "tags": ["hooks", "conditional", "context-aware", "ci-cd", "advanced"]
+  },
+  {
+    "id": "hooks-014",
+    "title": "Enforce Code Quality Gates in CI with Hooks",
+    "level": "advanced",
+    "category": "hooks",
+    "tip": "Configure hooks in CI settings to enforce team quality standards that can't be bypassed. Use a CI-specific settings.json that validates all writes against linting, type-checking, or security scanning.",
+    "example": "# .claude/settings.ci.json (used in CI environments)\n{\n  \"hooks\": {\n    \"PostToolUse\": [{\n      \"matcher\": \"Write\",\n      \"hooks\": [{\n        \"type\": \"command\",\n        \"command\": \"bash .claude/hooks/ci-quality-gate.sh\"\n      }]\n    }]\n  }\n}\n\n# .claude/hooks/ci-quality-gate.sh\n#!/bin/bash\nFILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty')\n[[ -z \"$FILE\" ]] && exit 0\n[[ \"$FILE\" != *.ts && \"$FILE\" != *.tsx ]] && exit 0\n\n# Run type check on the specific file\nif ! npx tsc --noEmit --allowJs \"$FILE\" 2>&1; then\n  echo \"Type check failed for $FILE. Fix type errors before proceeding.\" >&2\n  exit 2\nfi",
+    "why": "CI quality gates via hooks prevent Claude from shipping broken code in automated pipelines. The hook catches issues at write-time rather than waiting for the full CI run.",
+    "source": "community",
+    "tags": ["hooks", "ci-cd", "quality-gates", "automation", "advanced"]
+  },
+  {
+    "id": "hooks-015",
+    "title": "Measure Hook Performance to Avoid Bottlenecks",
+    "level": "advanced",
+    "category": "hooks",
+    "tip": "Hooks add latency to every tool call they match. Measure hook execution time and optimize slow hooks by caching results, running async where possible, or narrowing matchers to reduce trigger frequency.",
+    "example": "# Add timing to hooks for profiling:\n# .claude/hooks/timed-hook.sh\n#!/bin/bash\nSTART=$(date +%s%N)  # nanoseconds\n\n# ... your hook logic ...\n\nEND=$(date +%s%N)\nDURATION_MS=$(( (END - START) / 1000000 ))\n\nif [[ $DURATION_MS -gt 500 ]]; then\n  echo \"[PERF WARNING] Hook took ${DURATION_MS}ms\" >> .claude/perf-log.txt\nfi\nexit 0\n\n# Optimization: cache expensive computations\nCACHE_FILE=\"/tmp/claude-hook-cache-$(date +%Y%m%d%H).json\"\nif [[ ! -f \"$CACHE_FILE\" ]]; then\n  # Expensive operation, run once per hour\n  build_cache > \"$CACHE_FILE\"\nfi\nRESULT=$(jq '.allowlist' \"$CACHE_FILE\")",
+    "why": "A 2-second hook running on every Bash call adds minutes of latency to a long agentic task. Profiling hooks prevents them from becoming the bottleneck in your workflow.",
+    "source": "community",
+    "tags": ["hooks", "performance", "optimization", "profiling", "advanced"]
+  },
+  {
+    "id": "hooks-016",
+    "title": "Build a Validation Pipeline Hook for Bash Commands",
+    "level": "advanced",
+    "category": "hooks",
+    "tip": "Create a comprehensive bash validation hook that checks for destructive operations, network calls in unexpected contexts, and resource-intensive commands before executing them.",
+    "example": "# .claude/hooks/validate-bash-comprehensive.sh\n#!/bin/bash\nCMD=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command // empty')\n[[ -z \"$CMD\" ]] && exit 0\n\n# Rule 1: Block production data drops\nif echo \"$CMD\" | grep -qE 'DROP (TABLE|DATABASE)|DELETE FROM .* WHERE 1=1'; then\n  echo \"BLOCKED: Destructive SQL detected. Use migrations.\" >&2; exit 2\nfi\n\n# Rule 2: Block unexpected curl to external URLs in tests\nif echo \"$CMD\" | grep -qE 'curl.*http' && [[ \"$PWD\" == */test* ]]; then\n  echo \"BLOCKED: Network calls not allowed in test directory.\" >&2; exit 2\nfi\n\n# Rule 3: Warn on resource-intensive commands\nif echo \"$CMD\" | grep -qE 'find / |grep -r / '; then\n  echo \"WARNING: Filesystem-wide search may be slow.\" >&2\n  # Don't block, just warn (exit 0)\nfi\n\nexit 0",
+    "why": "A comprehensive validation hook serves as the last line of defense before dangerous commands execute, catching patterns that would be expensive or irreversible to undo.",
+    "source": "community",
+    "tags": ["hooks", "validation", "bash", "safety", "comprehensive", "advanced"]
+  }
+]

@@ -1,0 +1,178 @@
+[
+  {
+    "id": "prompt-001",
+    "title": "Be Specific: Name Files, Functions, and Expected Behavior",
+    "level": "beginner",
+    "category": "prompts",
+    "tip": "Replace vague requests with specific ones. Name the exact files, functions, or components you want changed, describe the expected behavior in concrete terms, and specify the inputs and outputs.",
+    "example": "# Vague (bad):\n'Make the login better'\n\n# Specific (good):\n'In src/components/LoginForm.tsx, update the form validation:\n- Email field: validate format on blur, show error below the field\n- Password field: show strength indicator as user types\n- Submit button: disable while submitting, show spinner\n- On success: redirect to /dashboard\n- On error: show the server error message below the submit button'",
+    "why": "Vague prompts lead to generic solutions. Specific prompts give Claude the exact scope and constraints it needs to produce exactly the right code on the first attempt.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "specificity", "clarity", "beginner"]
+  },
+  {
+    "id": "prompt-002",
+    "title": "Provide Context About Your Tech Stack and Constraints",
+    "level": "beginner",
+    "category": "prompts",
+    "tip": "Before asking Claude to implement something, provide the relevant context: your tech stack, existing patterns in the codebase, constraints you're working within, and what already exists.",
+    "example": "# Without context:\n'Add user authentication'\n\n# With context:\n'Add user authentication to this Express app. Context:\n- We use Passport.js (already installed, see src/config/passport.ts)\n- Sessions stored in Redis (config at src/config/redis.ts)\n- User model at src/models/User.ts (Mongoose, see schema)\n- All routes follow the pattern in src/routes/profile.ts\n- We use JWT for API routes, session cookies for web routes\nPlease implement email/password login following these existing patterns.'",
+    "why": "Context prevents Claude from inventing solutions that conflict with your architecture. It works within what you have rather than introducing new dependencies or patterns.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "context", "tech-stack", "constraints", "beginner"]
+  },
+  {
+    "id": "prompt-003",
+    "title": "Break Large Tasks into Focused Single-Step Prompts",
+    "level": "beginner",
+    "category": "prompts",
+    "tip": "Resist prompting Claude with a 10-part task in one message. Break complex work into sequential focused prompts, each completing one clear thing before moving to the next.",
+    "example": "# One massive prompt (bad):\n'Build a complete e-commerce checkout flow with cart management, address form,\npayment integration, order confirmation email, database storage, admin dashboard\nview, and mobile responsiveness'\n\n# Sequential focused prompts (good):\n# Prompt 1: 'Create the Cart model and CartService with add/remove/clear methods'\n# Review output, then:\n# Prompt 2: 'Build the CartController routes using CartService'\n# Review output, then:\n# Prompt 3: 'Create the React CartPage component using the CartController API'\n# ...continue step by step",
+    "why": "Large prompts overwhelm scope and often result in shallow implementations of everything. Sequential prompts let you verify each piece before building on it.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "task-decomposition", "step-by-step", "beginner"]
+  },
+  {
+    "id": "prompt-004",
+    "title": "Show Examples of What You Want",
+    "level": "beginner",
+    "category": "prompts",
+    "tip": "When you have a pattern you want Claude to follow, show it an example rather than describing it. Point to existing files in your codebase that demonstrate the desired style.",
+    "example": "# Describing without example:\n'Create a React component with our standard structure and styling'\n\n# Showing with example:\n'Create a UserAvatar React component. Follow the exact pattern used in\nsrc/components/ProductCard.tsx:\n- Same prop types structure\n- Same Tailwind class organization\n- Same storybook story format at src/stories/UserAvatar.stories.tsx\n- Same test structure at src/components/__tests__/UserAvatar.test.tsx'",
+    "why": "Examples are unambiguous. Claude can pattern-match from a concrete example much more accurately than it can interpret a description of your preferred style.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "examples", "pattern-matching", "code-style", "beginner"]
+  },
+  {
+    "id": "prompt-005",
+    "title": "Iterate and Refine Rather Than Starting Over",
+    "level": "beginner",
+    "category": "prompts",
+    "tip": "When Claude's output isn't quite right, give targeted refinement feedback rather than redoing the whole prompt. Identify the specific aspect that's wrong and ask for that change only.",
+    "example": "# Claude generates a component, but the error handling is wrong.\n\n# Starting over (bad):\n'Redo the whole component, this time with better error handling'\n\n# Targeted refinement (good):\n'The component looks good. One fix needed:\nIn the fetchUser function (lines 23-35), handle the error case differently:\n- Currently: throws an unhandled exception\n- Should: set an error state and show an error message in the UI\n- Keep everything else the same'",
+    "why": "Starting over throws away correct work. Targeted refinement preserves what's good while fixing what's wrong — much faster than regenerating from scratch.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "iteration", "refinement", "efficiency", "beginner"]
+  },
+  {
+    "id": "prompt-006",
+    "title": "Use Constraints to Bound Claude's Solution Space",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "Add explicit constraints to prevent Claude from making decisions you care about. Specify what to NOT use, what to preserve, performance limits, and scope boundaries.",
+    "example": "# Without constraints:\n'Optimize the user search functionality'\n\n# With constraints:\n'Optimize the user search in src/services/UserService.ts.\nConstraints:\n- Do NOT change the public API (function signatures must stay the same)\n- Do NOT introduce new dependencies (only use what's in package.json)\n- The query must complete in under 200ms for datasets up to 100k users\n- Do NOT touch the test files — just fix the implementation\n- Must work with the existing PostgreSQL indexes (check ./docs/schema.md)'",
+    "why": "Unconstrained prompts give Claude too many degrees of freedom, leading to solutions that are technically correct but inappropriate for your context — new dependencies, breaking API changes, etc.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "constraints", "boundaries", "intermediate"]
+  },
+  {
+    "id": "prompt-007",
+    "title": "Reference Files by Path for Precision",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "Always reference files by their exact path rather than describing them. Claude can read the actual file to understand the current state, rather than working from your description of it.",
+    "example": "# Describing a file (ambiguous):\n'Update the user authentication service to support refresh tokens'\n\n# Referencing by path (precise):\n'Read src/services/AuthService.ts first, then add refresh token support.\nThe current implementation uses JWT access tokens (see generateToken method).\nAdd:\n1. generateRefreshToken method (7-day expiry)\n2. validateRefreshToken method\n3. refreshAccessToken method that accepts a refresh token and returns a new access token'\n\n# Claude reads the actual file and works from its real current state",
+    "why": "Path references let Claude read the actual file state. Your description of a file may be out of date or miss implementation details that Claude needs to write compatible code.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "file-references", "precision", "intermediate"]
+  },
+  {
+    "id": "prompt-008",
+    "title": "Ask Claude to Explain Before Changing",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "For complex changes, ask Claude to explain its proposed approach before writing any code. This surfaces incorrect assumptions early, before you've wasted time reviewing bad code.",
+    "example": "# Two-phase approach:\n# Phase 1 - plan:\n'I want to migrate our REST API to tRPC. Before writing any code:\n1. Read the existing API structure in src/routes/\n2. Explain your migration plan: what files change, what stays the same\n3. Identify any potential breaking changes or risks\n4. Estimate the scope (how many files)\nDon't write code yet — just explain your plan.'\n\n# After reviewing and approving the plan:\n# Phase 2 - implement:\n'The plan looks good. Now implement it starting with the auth routes.'",
+    "why": "A 5-minute plan review prevents a 30-minute code review of a wrong approach. Early correction is always cheaper than late correction.",
+    "source": "community",
+    "tags": ["prompting", "planning", "explain-first", "intermediate"]
+  },
+  {
+    "id": "prompt-009",
+    "title": "Use 'Think Step by Step' for Complex Logic",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "For algorithmically complex tasks, explicitly ask Claude to think through the problem step by step before writing code. This engages more deliberate reasoning and catches logical errors early.",
+    "example": "# Without step-by-step:\n'Write a function to find all circular dependencies in a module graph'\n\n# With step-by-step:\n'I need a function to detect circular dependencies in a JavaScript module graph.\nThink through the algorithm step by step:\n1. What data structure represents the graph?\n2. What algorithm detects cycles efficiently?\n3. How do we handle edge cases (self-references, deep cycles)?\n4. What should the function return when a cycle is found?\n\nExplain your reasoning, then write the implementation.'\n\n# Claude: 'I'll use DFS with a visited set and a recursion stack...\n# A node is in a cycle if it appears in the current recursion path...'",
+    "why": "Step-by-step reasoning activates more careful analysis. Claude is less likely to write confidently incorrect solutions when it has to show its reasoning first.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "reasoning", "step-by-step", "algorithms", "intermediate"]
+  },
+  {
+    "id": "prompt-010",
+    "title": "Build Feedback Loops with Test-First Prompting",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "Ask Claude to write tests first, run them (they should fail), then write the implementation to make them pass. This creates a built-in feedback loop that validates correctness.",
+    "example": "# Test-first workflow:\n'Write tests for a PasswordValidator class that:\n- Requires minimum 12 characters\n- Requires at least one uppercase, lowercase, number, and special char\n- Rejects common passwords (use a list)\n- Returns specific error messages per failed rule\n\nStep 1: Write the tests (they will fail — no implementation exists)\nStep 2: Run the tests and confirm they fail with the right error\nStep 3: Write the PasswordValidator implementation\nStep 4: Run tests until all pass\nStep 5: Show me the final passing test output'",
+    "why": "Tests as a feedback loop guarantee that implementation correctness is verified, not assumed. Claude can't claim it's done until it shows you green tests.",
+    "source": "community",
+    "tags": ["prompting", "tdd", "feedback-loops", "testing", "intermediate"]
+  },
+  {
+    "id": "prompt-011",
+    "title": "Decompose Complex Tasks with Explicit Dependencies",
+    "level": "intermediate",
+    "category": "prompts",
+    "tip": "When breaking down large tasks, explicitly map dependencies between subtasks so Claude knows the correct execution order and what each step builds on.",
+    "example": "# Explicit dependency mapping:\n'Implement the order processing system in this sequence (each step depends on the previous):\n\n1. OrderItem model (no dependencies)\n2. Order model (depends on: OrderItem)\n3. OrderRepository (depends on: Order, OrderItem, existing db connection)\n4. OrderService (depends on: OrderRepository, existing PaymentService)\n5. OrderController routes (depends on: OrderService, existing auth middleware)\n6. Integration tests (depends on: all above)\n\nComplete each step, run tests, then proceed to the next.\nDo not start step N+1 until step N has passing tests.'",
+    "why": "Explicit dependencies prevent Claude from implementing components in wrong order, referencing things that don't exist yet, or building on unstable foundations.",
+    "source": "community",
+    "tags": ["prompting", "task-decomposition", "dependencies", "ordering", "intermediate"]
+  },
+  {
+    "id": "prompt-012",
+    "title": "Use Structured Output Prompts for Machine-Readable Results",
+    "level": "advanced",
+    "category": "prompts",
+    "tip": "When Claude's output will be consumed by scripts or other tools, specify the exact output format and structure. Ask for JSON, YAML, or specific markdown formats rather than free-form text.",
+    "example": "# Ask for structured output:\n'Analyze the files in src/api/ for REST API quality issues.\nReturn results as JSON with this exact structure:\n{\n  \"summary\": { \"files_analyzed\": N, \"issues_found\": N, \"severity_breakdown\": {...} },\n  \"issues\": [\n    {\n      \"file\": \"path/to/file.ts\",\n      \"line\": 42,\n      \"severity\": \"high|medium|low\",\n      \"category\": \"security|performance|design|missing-validation\",\n      \"description\": \"...\",\n      \"suggestion\": \"...\"\n    }\n  ]\n}\nOutput ONLY the JSON, no explanation text.'",
+    "why": "Structured output enables automation — you can pipe Claude's response to jq, parse it in scripts, or feed it to another tool. Free-form text requires fragile parsing.",
+    "source": "community",
+    "tags": ["prompting", "structured-output", "json", "automation", "advanced"]
+  },
+  {
+    "id": "prompt-013",
+    "title": "Use Meta-Prompting to Improve Your Own Prompts",
+    "level": "advanced",
+    "category": "prompts",
+    "tip": "Ask Claude to help you write better prompts for complex tasks. Describe what you're trying to achieve and ask Claude to write an optimal prompt for it, then use that prompt.",
+    "example": "# Meta-prompt:\n'I want to use you to refactor a large TypeScript codebase to use more functional\nprogramming patterns. Write me an optimal prompt that I should use to get the\nbest results from you for this task. Consider:\n- What context you need to see first\n- What constraints I should specify\n- What step-by-step approach would work best\n- What format the output should be in\nWrite the prompt I should use, not the refactoring itself.'\n\n# Claude writes a detailed, well-structured prompt\n# Then you use that prompt for the actual refactoring",
+    "why": "Claude knows what makes prompts effective for itself. Meta-prompting generates optimized prompts for complex tasks you may not know how to phrase well.",
+    "source": "community",
+    "tags": ["prompting", "meta-prompting", "optimization", "advanced"]
+  },
+  {
+    "id": "prompt-014",
+    "title": "Apply Few-Shot Examples for Domain-Specific Code Generation",
+    "level": "advanced",
+    "category": "prompts",
+    "tip": "For code generation in specialized domains (custom DSLs, internal frameworks, unusual patterns), provide 2-3 examples of correctly-formatted output before asking Claude to generate more.",
+    "example": "# Few-shot prompt for a custom internal framework:\n'Generate API route definitions for our custom framework. Here are 2 examples:\n\nExample 1 — GET route:\n@Route({ method: \"GET\", path: \"/users/:id\", auth: \"required\", roles: [\"admin\", \"user\"] })\nasync getUser(ctx: AppContext): Promise<UserDTO> {\n  return UserService.findById(ctx.params.id, ctx.user);\n}\n\nExample 2 — POST route:\n@Route({ method: \"POST\", path: \"/orders\", auth: \"required\", validate: CreateOrderSchema })\nasync createOrder(ctx: AppContext): Promise<OrderDTO> {\n  return OrderService.create(ctx.body, ctx.user);\n}\n\nNow generate routes for: list all products, get product by ID, create product (admin only)'",
+    "why": "Few-shot examples show exact syntax and conventions that can't easily be described. The model matches the pattern rather than inventing its own format.",
+    "source": "anthropic-docs",
+    "tags": ["prompting", "few-shot", "code-generation", "domain-specific", "advanced"]
+  },
+  {
+    "id": "prompt-015",
+    "title": "Use Chain-of-Thought Prompting for Debugging",
+    "level": "advanced",
+    "category": "prompts",
+    "tip": "For debugging complex issues, structure your prompt as a systematic debugging investigation with explicit steps. Ask Claude to reason through each possibility before reaching a conclusion.",
+    "example": "# Chain-of-thought debugging prompt:\n'There's a memory leak in our Node.js server. It grows 50MB/hour under load.\nInvestigate systematically:\n\n1. Read src/server.ts and identify resource allocation patterns\n2. Check for event listener patterns — list each EventEmitter usage\n3. Check for timer patterns — list all setInterval/setTimeout calls\n4. Check for closure patterns that might retain large objects\n5. Read the route handlers in src/routes/ for request-scoped leaks\n6. For each finding, estimate its leak probability (high/medium/low)\n7. Propose the 3 most likely root causes in order of probability\n8. Suggest a specific fix for the most likely cause\n\nShow your reasoning at each step.'",
+    "why": "Systematic debugging prompts produce thorough analysis. Asking Claude to show reasoning at each step prevents it from jumping to the first plausible explanation without investigating alternatives.",
+    "source": "community",
+    "tags": ["prompting", "debugging", "chain-of-thought", "systematic", "advanced"]
+  },
+  {
+    "id": "prompt-016",
+    "title": "Prompt for Adversarial Review of Your Own Code",
+    "level": "advanced",
+    "category": "prompts",
+    "tip": "Ask Claude to act as an adversarial reviewer — explicitly trying to break, exploit, or find flaws in code Claude or you just wrote. This surfaces edge cases and security issues that affirmative reviews miss.",
+    "example": "# Adversarial review prompt:\n'You just helped me write the payment processing code in src/services/PaymentService.ts.\nNow act as a hostile security researcher trying to find vulnerabilities.\n\nAttack angles to investigate:\n1. Can you bypass the payment amount validation?\n2. Are there race conditions in concurrent payment processing?\n3. Can you manipulate the payment status through API inputs?\n4. Are webhook signatures properly verified?\n5. Is there any way to process a payment without proper auth?\n6. What happens with extremely large or negative amounts?\n\nFor each vulnerability found, show the exact exploit path and the fix.'",
+    "why": "The same AI that wrote the code has blind spots about its flaws. An explicit adversarial framing switches Claude into a different mode — finding flaws rather than defending decisions.",
+    "source": "community",
+    "tags": ["prompting", "adversarial-review", "security", "code-review", "advanced"]
+  }
+]

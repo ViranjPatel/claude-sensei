@@ -1,0 +1,145 @@
+{
+  "category": "agents",
+  "questions": [
+    {
+      "id": "agent-q1",
+      "difficulty": "beginner",
+      "question": "What is the fundamental distinction between a Claude Code agent and a custom command?",
+      "options": [
+        "A) Agents can use tools; commands cannot use any tools",
+        "B) An agent is an autonomous, reusable AI persona with its own configuration; a command is a templated prompt or script invoked on demand",
+        "C) Commands support multiple turns of conversation; agents only respond once",
+        "D) Agents are defined in JSON; commands are defined in YAML"
+      ],
+      "correct": "B",
+      "explanation": "An agent is a configured AI persona — it has its own name, description, model selection, tool restrictions, and system prompt. It can operate autonomously on complex tasks. A custom command is a reusable prompt template (often a slash command) that the user invokes to execute a predefined workflow. Agents are more independent and configurable; commands are simpler and more directive.",
+      "tip_ref": "agent-001"
+    },
+    {
+      "id": "agent-q2",
+      "difficulty": "beginner",
+      "question": "Which frontmatter field in an agent definition sets the display name shown to users when the agent is listed?",
+      "options": [
+        "A) id",
+        "B) description",
+        "C) name",
+        "D) label"
+      ],
+      "correct": "C",
+      "explanation": "The 'name' field in an agent's frontmatter is the human-readable display name that appears when listing available agents or when the agent introduces itself. The 'description' field provides a longer summary of what the agent does. The 'id' is the internal identifier used for programmatic references and namespacing.",
+      "tip_ref": "agent-002"
+    },
+    {
+      "id": "agent-q3",
+      "difficulty": "beginner",
+      "question": "How do you typically trigger a named agent within a Claude Code session?",
+      "options": [
+        "A) By running a special CLI flag: claude --agent=<name>",
+        "B) By typing @agent-name in the conversation to summon it",
+        "C) Agents cannot be triggered by users; they only run on scheduled tasks",
+        "D) By editing the CLAUDE.md file and reloading the session"
+      ],
+      "correct": "B",
+      "explanation": "Named agents in Claude Code are invoked using the @ mention syntax, e.g., @security-reviewer or @doc-writer. This signals to Claude Code that a specific configured agent persona should handle the request. This is similar to how some chat platforms use @ mentions to route messages to specific bots or team members.",
+      "tip_ref": "agent-003"
+    },
+    {
+      "id": "agent-q4",
+      "difficulty": "intermediate",
+      "question": "What does the 'tools' frontmatter field in an agent definition control?",
+      "options": [
+        "A) The list of npm packages available to the agent's code execution environment",
+        "B) The set of Claude Code tools (e.g., Read, Write, Bash) that the agent is permitted or restricted to use",
+        "C) External MCP servers that the agent should connect to on startup",
+        "D) The programming languages the agent is specialized in"
+      ],
+      "correct": "B",
+      "explanation": "The 'tools' field in agent frontmatter defines the tool allowlist or restrictions for that specific agent. For example, a documentation agent might be restricted to Read and Write tools only, preventing it from executing shell commands. This principle of least privilege means each agent only has access to the tools it legitimately needs, reducing the blast radius of mistakes or prompt injection.",
+      "tip_ref": "agent-004"
+    },
+    {
+      "id": "agent-q5",
+      "difficulty": "intermediate",
+      "question": "What is the purpose of the 'color' frontmatter field in an agent definition?",
+      "options": [
+        "A) It sets the background color of the terminal window when the agent is active",
+        "B) It is a visual identifier used in the UI to help users distinguish between different agents at a glance",
+        "C) It controls the syntax highlighting theme for code the agent produces",
+        "D) It is a required field that affects agent priority — warmer colors have higher priority"
+      ],
+      "correct": "B",
+      "explanation": "The 'color' field is a purely cosmetic/UX attribute. When multiple agents are available or active, distinct colors in the interface help users quickly identify which agent they are interacting with. It has no effect on the agent's behavior, capabilities, or priority. Omitting it just means the agent uses a default color.",
+      "tip_ref": "agent-005"
+    },
+    {
+      "id": "agent-q6",
+      "difficulty": "intermediate",
+      "question": "When designing a system prompt for a specialized agent, which approach produces the most reliable, focused behavior?",
+      "options": [
+        "A) Make the system prompt as short as possible — one sentence is ideal",
+        "B) Copy the default Claude system prompt and add one line specific to the agent's role",
+        "C) Clearly define the agent's role, scope, output format, and explicit constraints on what it should not do",
+        "D) Use only examples in the system prompt and avoid any direct instructions"
+      ],
+      "correct": "C",
+      "explanation": "Effective agent system prompts define four key elements: (1) role — who the agent is, (2) scope — what tasks it handles and what it defers or refuses, (3) output format — how responses should be structured, and (4) negative constraints — explicit rules about what not to do. This prevents the agent from drifting into general-purpose assistant behavior when it should stay specialized.",
+      "tip_ref": "agent-006"
+    },
+    {
+      "id": "agent-q7",
+      "difficulty": "intermediate",
+      "question": "What does 'namespacing' mean in the context of multi-agent Claude Code setups?",
+      "options": [
+        "A) Each agent gets its own isolated filesystem namespace using Linux namespaces",
+        "B) Agent identifiers are prefixed (e.g., team/agent-name) to avoid naming collisions across different plugin packages or teams",
+        "C) Agents only operate within the namespace of a single git branch",
+        "D) Namespacing refers to the model family (e.g., claude-3 namespace vs claude-2 namespace)"
+      ],
+      "correct": "B",
+      "explanation": "In a project with multiple agent plugins or a large team sharing agent definitions, namespacing prefixes agent IDs to prevent collisions. For example, a 'reviewer' agent from the security team would be 'security/reviewer' while one from the QA team would be 'qa/reviewer'. This allows both to coexist without ambiguity and makes it clear which team or package owns each agent.",
+      "tip_ref": "agent-007"
+    },
+    {
+      "id": "agent-q8",
+      "difficulty": "advanced",
+      "question": "An agent configured with model: 'claude-3-haiku' is being used for a task that requires careful multi-step reasoning. Users report it makes frequent errors. What is the most appropriate fix?",
+      "options": [
+        "A) Increase the agent's temperature to give it more creative reasoning latitude",
+        "B) Add more examples to the system prompt to compensate for the smaller model's limitations",
+        "C) Update the model field to a more capable model (e.g., claude-3-5-sonnet or claude-opus) suited for complex reasoning tasks",
+        "D) Split the task into many tiny sub-tasks and run multiple Haiku agents in parallel"
+      ],
+      "correct": "C",
+      "explanation": "Model selection should match task complexity. Claude Haiku is optimized for speed and cost on simpler, well-defined tasks. Complex multi-step reasoning benefits from a more capable model like Sonnet or Opus. While decomposing tasks (option D) can help, it cannot fully compensate for a model that lacks the reasoning depth the task requires. The right solution is to use the right model for the job.",
+      "tip_ref": "agent-008"
+    },
+    {
+      "id": "agent-q9",
+      "difficulty": "advanced",
+      "question": "What is the risk of giving a specialized agent unrestricted access to all Claude Code tools (no 'tools' restriction in frontmatter)?",
+      "options": [
+        "A) The agent will run slower because it must evaluate all tools before choosing one",
+        "B) The agent may use tools outside its intended scope — for example, a documentation agent executing arbitrary shell commands — increasing the attack surface and risk of unintended side effects",
+        "C) Claude Code will reject the agent definition because 'tools' is a required field",
+        "D) Unrestricted tool access causes the agent to consume more API tokens per request"
+      ],
+      "correct": "B",
+      "explanation": "Omitting tool restrictions gives the agent the full Claude Code toolset by default. A documentation agent that can also run Bash commands or modify arbitrary files is far more dangerous if it misunderstands a request or is targeted by prompt injection. Following the principle of least privilege — only granting tools the agent actually needs — limits the potential damage from errors or adversarial inputs.",
+      "tip_ref": "agent-009"
+    },
+    {
+      "id": "agent-q10",
+      "difficulty": "advanced",
+      "question": "A team defines a 'code-reviewer' agent. A user asks it to fix the bugs it finds, but it refuses, only reporting them. What agent design element is most likely responsible for this behavior?",
+      "options": [
+        "A) The model field specifies a read-only model variant that cannot generate code",
+        "B) The system prompt explicitly scopes the agent to 'review and report only' with a constraint against making changes",
+        "C) The tools field is set to an empty list, preventing all tool use",
+        "D) The agent's color field is set to 'red', which enables read-only mode"
+      ],
+      "correct": "B",
+      "explanation": "This is intentional and correct behavior by design. The system prompt's explicit scope definition ('review and report only, do not modify files') is doing exactly what it is supposed to do: keeping the agent focused on its defined role. A reviewer that can also edit code is a different agent with a broader role. Clear constraints in the system prompt are the primary mechanism for shaping agent behavior, not tool restrictions alone.",
+      "tip_ref": "agent-010"
+    }
+  ]
+}

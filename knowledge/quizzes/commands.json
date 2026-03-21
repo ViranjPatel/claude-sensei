@@ -1,0 +1,145 @@
+{
+  "category": "commands",
+  "questions": [
+    {
+      "id": "cmd-q1",
+      "difficulty": "beginner",
+      "question": "What does the built-in /help command do in Claude Code?",
+      "options": [
+        "A) Opens a web browser to the Claude documentation site",
+        "B) Displays a list of available built-in commands and their descriptions within the current session",
+        "C) Asks Claude to explain the code in the current file",
+        "D) Generates a help document for the project based on the codebase"
+      ],
+      "correct": "B",
+      "explanation": "/help is a built-in slash command that prints the available commands and their descriptions directly in the session, without leaving the terminal or opening a browser. It is the quickest way to discover what commands are available, especially useful when first learning Claude Code or when using an unfamiliar installation.",
+      "tip_ref": "cmd-001"
+    },
+    {
+      "id": "cmd-q2",
+      "difficulty": "beginner",
+      "question": "Where do you place a custom command file so that Claude Code recognizes it as a slash command?",
+      "options": [
+        "A) In the root of the repository as a .command file",
+        "B) In the ~/.claude/ directory with a .cmd extension",
+        "C) In the .claude/commands/ directory within the project, as a markdown (.md) file",
+        "D) In the .git/hooks/ directory as an executable script"
+      ],
+      "correct": "C",
+      "explanation": "Custom commands are markdown files placed in .claude/commands/ within a project (for project-scoped commands) or ~/.claude/commands/ (for personal global commands). The filename becomes the command name — for example, .claude/commands/review-pr.md creates the /review-pr command. Using markdown allows rich formatting, frontmatter for metadata, and embedding both natural language instructions and code blocks.",
+      "tip_ref": "cmd-002"
+    },
+    {
+      "id": "cmd-q3",
+      "difficulty": "beginner",
+      "question": "What does the /clear command do, and how does it differ from /compact?",
+      "options": [
+        "A) /clear removes all files created in the session; /compact removes temporary files only",
+        "B) /clear wipes the entire conversation history and starts a fresh session; /compact summarizes the history into a condensed form while preserving context",
+        "C) /clear resets Claude's configuration to defaults; /compact reduces config file size",
+        "D) They are identical commands with different names for compatibility"
+      ],
+      "correct": "B",
+      "explanation": "/clear completely wipes the conversation history — all context, goals, and intermediate results are lost. Use it when you want a completely fresh start on an unrelated task. /compact instead creates a summary that preserves the key context (decisions, code written, current goals) while dramatically reducing token count. Use /compact when you want to continue the same work but free up context space.",
+      "tip_ref": "cmd-003"
+    },
+    {
+      "id": "cmd-q4",
+      "difficulty": "intermediate",
+      "question": "What is the purpose of frontmatter in a custom command file?",
+      "options": [
+        "A) Frontmatter defines the visual formatting (colors, fonts) of the command's output",
+        "B) Frontmatter provides metadata about the command — such as its description, expected arguments, and allowed tools — that Claude Code uses when parsing and executing the command",
+        "C) Frontmatter is required for the file to be recognized as a command; without it the file is ignored",
+        "D) Frontmatter is used only for commands that call external APIs"
+      ],
+      "correct": "B",
+      "explanation": "Frontmatter in custom command files (the YAML block between --- delimiters at the top) provides metadata: a description shown in /help output, argument definitions with types and whether they are required, tool restrictions specific to the command, and other configuration. This metadata helps Claude Code understand how to invoke the command correctly and helps users understand how to use it.",
+      "tip_ref": "cmd-004"
+    },
+    {
+      "id": "cmd-q5",
+      "difficulty": "intermediate",
+      "question": "How do you pass an argument to a custom command when invoking it in a session?",
+      "options": [
+        "A) Arguments cannot be passed to custom commands; they use only hardcoded values",
+        "B) By typing the command followed by the argument: /my-command argument-value",
+        "C) By setting environment variables before invoking the command",
+        "D) By editing the command file to include the argument value before running it"
+      ],
+      "correct": "B",
+      "explanation": "Custom commands accept arguments passed inline after the command name, similar to CLI tools. The command file uses a placeholder syntax (e.g., $ARGUMENTS or {{input}}) to reference the passed value within the command's instructions. For example, '/review-pr 123' would pass '123' to the /review-pr command, which could then use it as a PR number to fetch and review.",
+      "tip_ref": "cmd-005"
+    },
+    {
+      "id": "cmd-q6",
+      "difficulty": "intermediate",
+      "question": "What is the key distinction between a custom command and a named agent in Claude Code?",
+      "options": [
+        "A) Custom commands can only be invoked once per session; agents can be invoked multiple times",
+        "B) Custom commands are reusable prompt templates that direct Claude to perform a task; agents are full AI personas with their own model, tools, and system prompt configuration",
+        "C) Custom commands are stored in the cloud; agents are stored locally",
+        "D) Custom commands support only text output; agents can generate files and run code"
+      ],
+      "correct": "B",
+      "explanation": "A custom command is essentially a reusable, parameterized prompt — it tells the main Claude instance what to do. An agent is a separate, fully configured AI persona with its own model selection, tool restrictions, system prompt, and identity. Commands are simpler and cheaper to create; agents are more powerful and appropriate when you need a consistent specialized persona across many different types of requests.",
+      "tip_ref": "cmd-006"
+    },
+    {
+      "id": "cmd-q7",
+      "difficulty": "intermediate",
+      "question": "A developer wants to create a custom /daily-standup command that generates a standup update from recent git commits. What should the command file contain?",
+      "options": [
+        "A) A Python script that runs git log and formats the output",
+        "B) A markdown file with frontmatter describing the command and a natural language prompt instructing Claude to run git log, summarize the changes, and format them as a standup update",
+        "C) A bash script placed in .claude/commands/ that Claude executes directly",
+        "D) A JSON config file specifying the git commands to run and the output template"
+      ],
+      "correct": "B",
+      "explanation": "Custom commands are markdown files containing natural language instructions. The /daily-standup command would instruct Claude (in plain language) to: run git log with appropriate flags to see recent commits, analyze the changes, identify the relevant work items, and format the result as a standup update (what I did, what I'm doing, any blockers). Claude then uses its tools (Bash for git log, its language abilities for summarization) to execute this.",
+      "tip_ref": "cmd-007"
+    },
+    {
+      "id": "cmd-q8",
+      "difficulty": "advanced",
+      "question": "A team wants to share custom commands across all developers without requiring each developer to manually copy files. What is the recommended approach?",
+      "options": [
+        "A) Each developer must copy the command files to their ~/.claude/commands/ directory manually",
+        "B) Store the command files in .claude/commands/ within the repository — they are version-controlled and available to everyone who clones the repo",
+        "C) Use a package manager like npm to distribute the command files as a dependency",
+        "D) Custom commands cannot be shared; they are inherently personal"
+      ],
+      "correct": "B",
+      "explanation": "Project-scoped custom commands stored in .claude/commands/ within the repository are automatically version-controlled alongside the code. Every developer who clones or pulls the repo gets the commands immediately. This is the standard way to share team-wide conventions, workflows, and productivity shortcuts — just like sharing ESLint configs or other project tooling through the repository.",
+      "tip_ref": "cmd-008"
+    },
+    {
+      "id": "cmd-q9",
+      "difficulty": "advanced",
+      "question": "What happens if a custom command file has a syntax error in its frontmatter YAML?",
+      "options": [
+        "A) Claude Code silently ignores the broken frontmatter and uses default values for all fields",
+        "B) The command is registered but executes with no metadata, potentially failing when arguments are expected",
+        "C) Claude Code fails to load the command and may report an error, leaving the command unavailable until the YAML is fixed",
+        "D) Claude interprets the malformed YAML as the command body and includes it verbatim in the prompt"
+      ],
+      "correct": "C",
+      "explanation": "YAML frontmatter must be syntactically valid for the command to be parsed and registered correctly. A syntax error (unclosed quotes, incorrect indentation, invalid characters) will cause the command loader to fail on that file. The command will not be available until the YAML is corrected. This is why it is important to validate command files — especially when argument definitions or tool restrictions are defined in frontmatter, as errors there affect core functionality.",
+      "tip_ref": "cmd-009"
+    },
+    {
+      "id": "cmd-q10",
+      "difficulty": "advanced",
+      "question": "A developer notices that the /config command changed a setting they did not intend to change. What is the safest way to audit and revert Claude Code configuration changes?",
+      "options": [
+        "A) Delete the ~/.claude/ directory and reinstall Claude Code to restore defaults",
+        "B) Use /config to view the current settings, identify the changed value, and use /config to revert it; also check if settings are stored in a version-controlled config file that can be git reverted",
+        "C) Configuration changes made via /config are permanent and cannot be reverted",
+        "D) Run Claude Code with the --reset-config flag to revert all settings to factory defaults"
+      ],
+      "correct": "B",
+      "explanation": "The /config command allows viewing current configuration values as well as setting them, so auditing what changed and reverting it is straightforward. Additionally, some Claude Code configuration may live in version-controlled files (like .claude/settings.json in a project), making git revert or git diff a powerful way to see what changed and when. Understanding where config is stored (global vs project-level) is key to targeted, safe reverts.",
+      "tip_ref": "cmd-010"
+    }
+  ]
+}

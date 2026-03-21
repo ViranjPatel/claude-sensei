@@ -1,0 +1,145 @@
+{
+  "category": "prompts",
+  "questions": [
+    {
+      "id": "prompt-q1",
+      "difficulty": "beginner",
+      "question": "Which of the following prompts is most likely to produce a useful, specific result from Claude?",
+      "options": [
+        "A) 'Write some code'",
+        "B) 'Help me with my project'",
+        "C) 'Write a Python function that takes a list of integers and returns a new list with duplicates removed, preserving the original order'",
+        "D) 'Do the coding thing we talked about'"
+      ],
+      "correct": "C",
+      "explanation": "Prompt specificity is the single biggest lever for improving Claude's output quality. Option C specifies language (Python), input type (list of integers), output type (new list), behavior (remove duplicates), and a non-obvious constraint (preserve original order). Vague prompts like A and B force Claude to guess intent, often producing generic or misaligned responses. Option D references context Claude may not have.",
+      "tip_ref": "prompt-001"
+    },
+    {
+      "id": "prompt-q2",
+      "difficulty": "beginner",
+      "question": "What is the primary benefit of decomposing a complex task into sequential steps in a prompt?",
+      "options": [
+        "A) It reduces the total number of tokens used, saving API costs",
+        "B) It forces Claude to show its work step-by-step, making each stage verifiable and reducing the chance of compounding errors",
+        "C) Decomposed prompts always run in parallel, making them faster",
+        "D) Claude cannot handle multi-step tasks in a single prompt"
+      ],
+      "correct": "B",
+      "explanation": "When a complex task is decomposed into explicit steps, each step produces an intermediate output that can be verified before the next step begins. This prevents errors from silently compounding — a mistake in step 1 that goes undetected can corrupt steps 2 through 10. Showing work also makes the reasoning transparent and easier to debug or correct. The reduction in compounding errors is the primary benefit, not token savings.",
+      "tip_ref": "prompt-002"
+    },
+    {
+      "id": "prompt-q3",
+      "difficulty": "beginner",
+      "question": "What does providing 'context' in a prompt mean, and why does it matter?",
+      "options": [
+        "A) Context means including your system's technical specifications so Claude can run code locally",
+        "B) Context means providing background information — the purpose, constraints, existing code, and relevant domain knowledge — that Claude needs to give accurate, relevant answers",
+        "C) Context refers to the number of previous messages in the conversation history",
+        "D) Context means asking Claude to explain its reasoning after every response"
+      ],
+      "correct": "B",
+      "explanation": "Context is the information gap between what you know and what Claude knows about your specific situation. Without context, Claude gives generic answers based on its training. With context (e.g., 'This is a Next.js app using the App Router, we use Tailwind for styling, and the component must be accessible'), Claude can give specific, immediately useful answers. Good context provision is the difference between getting a template and getting a solution.",
+      "tip_ref": "prompt-003"
+    },
+    {
+      "id": "prompt-q4",
+      "difficulty": "intermediate",
+      "question": "What is 'meta-prompting' and when is it useful?",
+      "options": [
+        "A) Writing prompts that ask Claude to generate other prompts optimized for a specific task",
+        "B) Adding metadata headers to prompts to help Claude categorize the request",
+        "C) Prompting Claude to critique its own previous response",
+        "D) Using special syntax markers (like XML tags) to structure sections of a complex prompt"
+      ],
+      "correct": "A",
+      "explanation": "Meta-prompting is the practice of using Claude to generate and refine the prompts you will use for other tasks. For example: 'I need to extract structured data from medical records. Help me write a prompt that will work reliably for this.' This is useful when you know the end goal but are not sure how to phrase the prompt optimally, or when you want to systematically improve prompts through iteration.",
+      "tip_ref": "prompt-004"
+    },
+    {
+      "id": "prompt-q5",
+      "difficulty": "intermediate",
+      "question": "What is 'plan mode' in Claude Code, and when should you use it?",
+      "options": [
+        "A) A mode where Claude only writes documentation and never generates code",
+        "B) A mode where Claude outlines its intended approach and waits for approval before taking any actions, ideal for high-stakes or ambiguous tasks",
+        "C) A scheduling feature that lets you queue prompts to run at specific times",
+        "D) A mode that limits Claude to using only free-tier API calls"
+      ],
+      "correct": "B",
+      "explanation": "Plan mode (often invoked with a prompt like 'plan this out before doing anything') instructs Claude to first produce a detailed plan of what it intends to do — which files to modify, what approach to take, potential risks — and pause for your approval. This is valuable for complex refactors, destructive operations, or any task where you want to review the strategy before execution begins, preventing costly mistakes.",
+      "tip_ref": "prompt-005"
+    },
+    {
+      "id": "prompt-q6",
+      "difficulty": "intermediate",
+      "question": "What is a 'few-shot' prompting pattern and what problem does it solve?",
+      "options": [
+        "A) A pattern where you ask Claude to complete a task in as few sentences as possible",
+        "B) Providing 2-5 worked examples of input-output pairs before asking Claude to perform the same task on new input, helping it learn the exact format and style you need",
+        "C) A technique for running the same prompt multiple times and taking the most common answer",
+        "D) Limiting Claude to only responding with short, bullet-pointed answers"
+      ],
+      "correct": "B",
+      "explanation": "Few-shot prompting provides concrete examples of what you want before asking Claude to do it. Instead of describing the desired output format in words (which Claude may interpret differently), you show it: 'Input: X → Output: Y. Input: A → Output: B. Now do: Input: Z → Output: ?'. This is especially powerful for tasks with idiosyncratic formatting, domain-specific conventions, or subtle stylistic requirements that are hard to describe verbally.",
+      "tip_ref": "prompt-006"
+    },
+    {
+      "id": "prompt-q7",
+      "difficulty": "intermediate",
+      "question": "How do constraints in a prompt improve Claude's output quality?",
+      "options": [
+        "A) Constraints limit Claude's response length, saving tokens",
+        "B) Constraints narrow the solution space to match real-world requirements, preventing Claude from generating technically correct but practically unusable solutions",
+        "C) Constraints force Claude to ask more clarifying questions before responding",
+        "D) Constraints have no effect on quality; they only affect response format"
+      ],
+      "correct": "B",
+      "explanation": "Without constraints, Claude optimizes for a generic 'correct' answer. Constraints align the solution with real-world requirements: 'must work in Node 16', 'must not use external libraries', 'must handle null inputs gracefully', 'response must fit in a 140-character SMS'. Each constraint eliminates valid-but-unusable solutions. Well-specified constraints are what turn a demo into production-ready output.",
+      "tip_ref": "prompt-007"
+    },
+    {
+      "id": "prompt-q8",
+      "difficulty": "advanced",
+      "question": "A developer writes: 'Refactor this function.' Claude makes changes that are technically correct but diverge from the team's architecture patterns. What is the root cause and best fix?",
+      "options": [
+        "A) The model is too powerful and over-engineers simple tasks; use a smaller model",
+        "B) The prompt lacked context about the existing architecture patterns, constraints, and what 'refactor' means in this codebase's conventions",
+        "C) Claude cannot do refactoring without seeing the entire codebase",
+        "D) 'Refactor' is an ambiguous word that Claude interprets as 'rewrite from scratch'"
+      ],
+      "correct": "B",
+      "explanation": "This is a classic context gap problem. 'Refactor this function' is ambiguous without specifying: what aspect to improve (readability? performance? testability?), what patterns the team uses (functional vs OOP, error handling conventions, naming conventions), and what constraints to respect (must not change the public API, must maintain backwards compatibility). Adding this context to the prompt — or into CLAUDE.md — produces architecturally consistent results.",
+      "tip_ref": "prompt-008"
+    },
+    {
+      "id": "prompt-q9",
+      "difficulty": "advanced",
+      "question": "What is the 'role prompting' technique and what are its limitations?",
+      "options": [
+        "A) Telling Claude to act as a specific expert persona to leverage domain knowledge; limitation is that it can cause Claude to make confident-sounding but incorrect statements outside the model's actual training",
+        "B) Assigning Claude a numbered role in a multi-agent team; limitation is that Claude cannot distinguish its role from other agents",
+        "C) Writing prompts entirely in the second person ('you should...'); limitation is that it increases response length",
+        "D) Asking Claude to play a fictional character; limitation is that it bypasses content safety filters"
+      ],
+      "correct": "A",
+      "explanation": "Role prompting (e.g., 'You are a senior security engineer...') can improve response quality by activating relevant knowledge and setting the expected tone and depth. However, it has a critical limitation: the persona framing can cause Claude to sound more authoritative than warranted, making confident-sounding statements in areas at the edge of its training. Always verify technical claims independently, especially in specialized domains, regardless of the persona framing.",
+      "tip_ref": "prompt-009"
+    },
+    {
+      "id": "prompt-q10",
+      "difficulty": "advanced",
+      "question": "When should you use a chain-of-thought prompt (asking Claude to 'think step by step') versus giving Claude a structured, step-by-step decomposition yourself?",
+      "options": [
+        "A) Always use chain-of-thought; never decompose manually as it constrains Claude's reasoning",
+        "B) Use chain-of-thought for open-ended reasoning problems where the right steps are unknown; use explicit decomposition when you know the correct process and want Claude to follow a specific procedure reliably",
+        "C) Use explicit decomposition for creative tasks; chain-of-thought for factual tasks",
+        "D) They produce identical results; the choice is purely stylistic"
+      ],
+      "correct": "B",
+      "explanation": "Chain-of-thought ('think step by step') gives Claude the freedom to discover its own reasoning path — best for novel problems where you do not know the right approach. Explicit decomposition (providing the numbered steps yourself) is better when you know the correct procedure: it ensures Claude follows your validated process rather than inventing its own. For example, a code review checklist should be explicit; analyzing a complex architectural tradeoff benefits from free-form chain-of-thought.",
+      "tip_ref": "prompt-010"
+    }
+  ]
+}

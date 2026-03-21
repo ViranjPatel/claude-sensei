@@ -1,0 +1,145 @@
+{
+  "category": "memory",
+  "questions": [
+    {
+      "id": "mem-q1",
+      "difficulty": "beginner",
+      "question": "What is the primary purpose of a CLAUDE.md file placed in your home directory (~/.claude/CLAUDE.md)?",
+      "options": [
+        "A) Store API keys and authentication tokens for Claude",
+        "B) Provide personal, global instructions that apply across all Claude projects",
+        "C) Cache conversation history to reduce API costs",
+        "D) Define project-specific coding standards for a single repository"
+      ],
+      "correct": "B",
+      "explanation": "The ~/.claude/CLAUDE.md file is a personal, global memory file. Instructions placed here apply to every Claude session regardless of which project you are working in. It is ideal for personal preferences like preferred coding style, communication style, or toolchain defaults. It is not for secrets (use environment variables for those) and is not project-scoped.",
+      "tip_ref": "mem-001"
+    },
+    {
+      "id": "mem-q2",
+      "difficulty": "beginner",
+      "question": "Where should you place a CLAUDE.md file so that it applies only to a specific project?",
+      "options": [
+        "A) ~/.claude/CLAUDE.md",
+        "B) ~/CLAUDE.md",
+        "C) The root directory of the project repository",
+        "D) Inside the .git folder of the repository"
+      ],
+      "correct": "C",
+      "explanation": "A CLAUDE.md placed at the root of a project repository (e.g., /my-project/CLAUDE.md) is automatically loaded when Claude is invoked from within that directory tree. This makes it ideal for project-specific context like architecture notes, coding conventions, and domain glossary. The home directory location (~/.claude/CLAUDE.md) is for global personal preferences.",
+      "tip_ref": "mem-002"
+    },
+    {
+      "id": "mem-q3",
+      "difficulty": "beginner",
+      "question": "What does the /compact command do in a Claude Code session?",
+      "options": [
+        "A) Compresses source files to reduce disk usage",
+        "B) Clears the entire conversation history and starts fresh",
+        "C) Summarizes the conversation into a condensed context to free up context window space",
+        "D) Exports the session to a markdown file for archiving"
+      ],
+      "correct": "C",
+      "explanation": "/compact summarizes the current conversation into a compact representation, preserving the key context (decisions made, code written, goals) while significantly reducing the token count. This is useful when a long session is approaching the context window limit. It is different from /clear, which wipes the conversation entirely.",
+      "tip_ref": "mem-003"
+    },
+    {
+      "id": "mem-q4",
+      "difficulty": "intermediate",
+      "question": "When Claude loads memory, which order correctly describes the layering priority from lowest to highest?",
+      "options": [
+        "A) Project CLAUDE.md → Global CLAUDE.md → Inline session instructions",
+        "B) Global CLAUDE.md → Project CLAUDE.md → Inline session instructions",
+        "C) Inline session instructions → Project CLAUDE.md → Global CLAUDE.md",
+        "D) All sources have equal priority; conflicts are resolved alphabetically"
+      ],
+      "correct": "B",
+      "explanation": "Memory layering works from most general to most specific. The global ~/.claude/CLAUDE.md is loaded first (lowest priority), then the project-level CLAUDE.md adds or overrides context, and finally any instructions given inline in the session take the highest priority. This means a project rule overrides a personal rule, and something said in-session overrides both.",
+      "tip_ref": "mem-004"
+    },
+    {
+      "id": "mem-q5",
+      "difficulty": "intermediate",
+      "question": "You have a monorepo with a root CLAUDE.md and individual subdirectory CLAUDE.md files for each package. What happens when Claude is invoked from the packages/api/ subdirectory?",
+      "options": [
+        "A) Only the packages/api/CLAUDE.md is loaded; root is ignored",
+        "B) Only the root CLAUDE.md is loaded; subdirectory files are ignored",
+        "C) Both the root CLAUDE.md and packages/api/CLAUDE.md are loaded, with subdirectory taking precedence",
+        "D) Claude randomly selects one of the available CLAUDE.md files"
+      ],
+      "correct": "C",
+      "explanation": "Claude performs a directory walk from the invocation path upward to the repository root, loading all CLAUDE.md files it finds. Instructions from deeper (more specific) directories take precedence over those from parent directories. This allows shared conventions at the repo root while permitting package-specific overrides in subdirectories.",
+      "tip_ref": "mem-005"
+    },
+    {
+      "id": "mem-q6",
+      "difficulty": "intermediate",
+      "question": "What is prompt caching, and what is the main benefit it provides in long Claude sessions?",
+      "options": [
+        "A) It saves your prompts to disk so they can be reused in future sessions without retyping",
+        "B) It allows Claude to reuse previously computed attention states for unchanged context, reducing latency and cost",
+        "C) It compresses the prompt to fewer tokens before sending to the API",
+        "D) It stores the model's output in a local cache to avoid duplicate API calls for identical prompts"
+      ],
+      "correct": "B",
+      "explanation": "Prompt caching is an API-level feature where the model can cache the KV (key-value) attention states for a stable prefix of the prompt. When the same prefix appears again (e.g., a long CLAUDE.md or system prompt), the cached states are reused instead of recomputing them, reducing both latency and cost. This is particularly valuable for large context files that appear at the start of every request.",
+      "tip_ref": "mem-006"
+    },
+    {
+      "id": "mem-q7",
+      "difficulty": "intermediate",
+      "question": "Which of the following is the BEST practice for managing what goes into a project CLAUDE.md to keep it effective?",
+      "options": [
+        "A) Include every possible fact about the project — the more context the better",
+        "B) Focus on stable, high-signal information: conventions, architecture, and known gotchas that Claude cannot infer from code",
+        "C) Only include information that changes frequently so Claude stays up to date",
+        "D) Keep it empty and rely entirely on the global CLAUDE.md for all context"
+      ],
+      "correct": "B",
+      "explanation": "A project CLAUDE.md is most effective when it contains stable, high-value context that is not obvious from reading the code: architectural decisions and their rationale, coding conventions, testing patterns, domain terminology, and known pitfalls. Dumping every fact inflates the context window unnecessarily, while an empty file wastes the feature entirely.",
+      "tip_ref": "mem-007"
+    },
+    {
+      "id": "mem-q8",
+      "difficulty": "advanced",
+      "question": "A developer notices that Claude seems to 'forget' important constraints mid-session despite them being in the CLAUDE.md. What is the most likely technical explanation?",
+      "options": [
+        "A) The CLAUDE.md file was not saved before starting the session",
+        "B) Claude deliberately ignores CLAUDE.md instructions it disagrees with",
+        "C) The conversation has grown so long that the CLAUDE.md content has been pushed out of or diluted within the active context window",
+        "D) CLAUDE.md files are only re-read when the /reload command is issued"
+      ],
+      "correct": "C",
+      "explanation": "Context windows are finite. As a conversation grows, earlier content (including the loaded CLAUDE.md) can become diluted or, in extreme cases, pushed beyond the model's effective attention. The model may still technically 'see' it but weigh it less. Solutions include using /compact to summarize and reinstate key constraints, breaking large sessions into shorter ones, or periodically restating critical constraints.",
+      "tip_ref": "mem-008"
+    },
+    {
+      "id": "mem-q9",
+      "difficulty": "advanced",
+      "question": "What is the key difference between using a CLAUDE.md file versus using a custom system prompt passed via the --system-prompt CLI flag?",
+      "options": [
+        "A) There is no difference; both methods are fully interchangeable",
+        "B) CLAUDE.md is version-controlled and portable with the repo; --system-prompt is ephemeral and applied at invocation time",
+        "C) --system-prompt supports markdown formatting while CLAUDE.md only supports plain text",
+        "D) CLAUDE.md is loaded before the model starts; --system-prompt is injected after the first user message"
+      ],
+      "correct": "B",
+      "explanation": "CLAUDE.md lives in the repository, making it version-controlled, shareable across the team, and automatically applied without any extra CLI flags. A --system-prompt passed at invocation is ephemeral — it exists only for that particular run and is not stored in the repo. The right tool depends on the use case: team-shared conventions belong in CLAUDE.md, while run-specific or automation-specific overrides may use --system-prompt.",
+      "tip_ref": "mem-009"
+    },
+    {
+      "id": "mem-q10",
+      "difficulty": "advanced",
+      "question": "Which strategy is most effective for preventing context bloat when performing a very long, multi-step refactoring task across many files?",
+      "options": [
+        "A) Increase the model's temperature setting to help it stay on track",
+        "B) Break the task into focused sub-sessions, using /compact at natural checkpoints and re-stating goals in each new session",
+        "C) Paste the entire codebase into the CLAUDE.md file so Claude always has full context",
+        "D) Avoid using Claude for tasks that span more than 5 files"
+      ],
+      "correct": "B",
+      "explanation": "Large refactoring tasks are best handled by decomposing them into focused sub-tasks with clear boundaries. Using /compact at natural checkpoints (e.g., after completing one module) creates a concise summary of progress, freeing context space for the next step. Re-stating the overarching goal at the start of each sub-session ensures continuity. Pasting the entire codebase into CLAUDE.md is counterproductive as it consumes context on content Claude can read on demand.",
+      "tip_ref": "mem-010"
+    }
+  ]
+}

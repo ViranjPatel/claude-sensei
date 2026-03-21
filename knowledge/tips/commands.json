@@ -1,0 +1,200 @@
+[
+  {
+    "id": "cmd-001",
+    "title": "Learn the Essential Built-In Commands",
+    "level": "beginner",
+    "category": "commands",
+    "tip": "Claude Code has several built-in slash commands that control session behavior. Knowing the core set covers 90% of your day-to-day needs. Type /help at any time for a full list.",
+    "example": "# Core built-in commands:\n/help          # Show all available commands\n/clear         # Clear conversation history (fresh start)\n/compact       # Summarize conversation to free context window\n/config        # View and edit configuration settings\n/status        # Show current session status and context usage\n/cost          # Show token usage and cost for this session\n/exit          # End the session\n\n# Usage:\n/compact       # When you see context warnings\n/clear         # When starting a completely new unrelated task",
+    "why": "Built-in commands give you direct control over session state. /compact and /clear are especially important for long working sessions where context management matters.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "built-in", "overview", "basics", "beginner"]
+  },
+  {
+    "id": "cmd-002",
+    "title": "Use /help to Discover Available Commands",
+    "level": "beginner",
+    "category": "commands",
+    "tip": "/help shows all available commands including both built-in Claude Code commands and any custom commands you've defined in .claude/commands/. Run it whenever you're unsure what's available.",
+    "example": "# In Claude Code session:\n/help\n\n# Output shows:\n# Built-in commands:\n#   /clear, /compact, /config, /cost, /exit, /help, /status...\n#\n# Project commands (from .claude/commands/):\n#   /review, /test, /deploy, /changelog...\n#\n# Each command shows its description so you know when to use it",
+    "why": "/help is your first stop for discoverability. It shows exactly what's available in your current project without reading documentation or files.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "help", "discovery", "beginner"]
+  },
+  {
+    "id": "cmd-003",
+    "title": "Use /compact Strategically to Extend Sessions",
+    "level": "beginner",
+    "category": "commands",
+    "tip": "/compact summarizes conversation history to free up context space, allowing you to continue a long session. Use it proactively before hitting limits, not reactively when you've already lost context.",
+    "example": "# Watch for context usage indicators, then:\n/compact\n\n# After compacting, orient Claude to continue:\n'We were working on the payment module. The next step is\nimplementing the webhook verification. The relevant files\nare src/webhooks/stripe.ts and src/services/PaymentService.ts.'\n\n# Pro tip: compact at logical boundaries, not mid-task:\n# Bad: /compact in the middle of implementing a function\n# Good: /compact after completing a feature, before starting the next",
+    "why": "Proactive compacting preserves important context in the summary. Reactive compacting after hitting the limit means Claude may have already lost critical context.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "compact", "context-management", "sessions", "beginner"]
+  },
+  {
+    "id": "cmd-004",
+    "title": "Use /clear When Starting Unrelated Tasks",
+    "level": "beginner",
+    "category": "commands",
+    "tip": "/clear wipes the conversation history completely, starting fresh. Use it when switching to a completely different task where the existing context would be irrelevant or confusing.",
+    "example": "# Scenario: You just finished debugging the auth system.\n# Now you want to work on a completely unrelated UI component.\n\n/clear\n\n# Then start fresh:\n'I need to build a DateRangePicker component. Requirements:\n- Two date inputs (start and end)\n- Calendar popup on focus\n- Highlight date range between selections...\n[etc]'\n\n# The auth debugging context is gone — Claude starts fresh\n# without the mental overhead of irrelevant auth discussions",
+    "why": "Leftover context from previous tasks can subtly influence Claude's responses. /clear ensures each new task gets focused attention without contamination from unrelated work.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "clear", "fresh-start", "context", "beginner"]
+  },
+  {
+    "id": "cmd-005",
+    "title": "Configure Claude Code Behavior with /config",
+    "level": "beginner",
+    "category": "commands",
+    "tip": "/config opens the Claude Code configuration editor where you can set your model, API key, editor preferences, and other session defaults. Changes persist to your local config file.",
+    "example": "# Open config:\n/config\n\n# Key settings you'll configure:\n# model: claude-opus-4-5 (or sonnet, haiku based on your needs)\n# apiKey: your Anthropic API key\n# editor: vscode (or your preferred editor)\n# theme: dark/light\n# verbosity: normal/verbose/quiet\n\n# Or set specific values directly:\n/config set model claude-sonnet-4-5\n/config set theme dark",
+    "why": "/config lets you tune Claude Code for your workflow without editing config files manually. Especially useful for switching models when you need speed vs. capability.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "config", "settings", "configuration", "beginner"]
+  },
+  {
+    "id": "cmd-006",
+    "title": "Create Custom Commands with Markdown Files",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "Custom commands are markdown files in .claude/commands/. The filename becomes the command name (e.g., review.md becomes /review). The file content is the prompt template sent to Claude.",
+    "example": "# Create .claude/commands/review.md:\nReview the code changes in the current working directory.\n\nPerform a comprehensive review covering:\n1. Correctness: logic errors, edge cases, off-by-one errors\n2. Security: injection risks, auth checks, input validation\n3. Performance: unnecessary loops, N+1 queries, blocking calls\n4. Code quality: naming, readability, single responsibility\n5. Tests: coverage gaps, missing edge case tests\n\nFormat output as: Issue | File:Line | Severity | Suggestion\n\n# Use it:\n/review",
+    "why": "Custom commands encode your team's recurring workflows as reusable prompts. Anyone on the team can run /review and get consistent, thorough output without remembering the full prompt.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "custom-commands", "creation", "markdown", "intermediate"]
+  },
+  {
+    "id": "cmd-007",
+    "title": "Add Frontmatter to Custom Commands for Metadata",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "Add YAML frontmatter to custom command files to provide a description and configure behavior. The description appears in /help output, making commands discoverable.",
+    "example": "# .claude/commands/changelog.md\n---\ndescription: Generate a CHANGELOG.md entry from recent git commits\nallowed-tools:\n  - Bash\n  - Write\n---\n\nGenerate a CHANGELOG.md entry for the changes since the last git tag.\n\n1. Run `git log $(git describe --tags --abbrev=0)..HEAD --oneline` to get recent commits\n2. Categorize commits by type (feat/fix/docs/etc)\n3. Format as Keep a Changelog format (## [Unreleased])\n4. Append to the top of CHANGELOG.md\n5. Show me the new entry before writing",
+    "why": "Frontmatter descriptions appear in /help, making your command library self-documenting. allowed-tools restricts which tools the command can use, improving safety.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "frontmatter", "metadata", "documentation", "intermediate"]
+  },
+  {
+    "id": "cmd-008",
+    "title": "Use the $ARGUMENTS Variable for Parameterized Commands",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "The $ARGUMENTS variable in custom commands captures everything typed after the command name, allowing you to create parameterized commands that work on specific files, modules, or inputs.",
+    "example": "# .claude/commands/test.md\n---\ndescription: Write comprehensive tests for a specific file\n---\nWrite comprehensive unit tests for the file at: $ARGUMENTS\n\n1. Read the file to understand its exports and interfaces\n2. Create a test file at the corresponding __tests__ path\n3. Cover all exported functions with happy path + edge cases\n4. Run the tests and fix any failures\n5. Report: N tests written, all passing\n\n# Usage:\n/test src/services/PaymentService.ts\n/test src/utils/date-helpers.ts",
+    "why": "$ARGUMENTS makes commands reusable across different targets. Without it, you'd need a separate command file for each module you want to test, document, or analyze.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "arguments", "parameters", "reusability", "intermediate"]
+  },
+  {
+    "id": "cmd-009",
+    "title": "Organize Commands in Subdirectories with Namespacing",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "Group related commands in subdirectories under .claude/commands/. Claude Code namespaces them with a colon (e.g., db/migrate.md becomes /db:migrate). This keeps your command library organized as it grows.",
+    "example": "# Organized command structure:\n.claude/commands/\n  db/\n    db-migrate.md      # /db:migrate\n    db-seed.md         # /db:seed\n    db-reset.md        # /db:reset\n  tests/\n    test-unit.md       # /tests:unit\n    test-integration.md # /tests:integration\n    test-coverage.md   # /tests:coverage\n  deploy/\n    deploy-staging.md  # /deploy:staging\n    deploy-prod.md     # /deploy:prod\n\n# Usage:\n/db:migrate\n/tests:coverage",
+    "why": "Namespacing prevents collisions and makes large command libraries navigable. Tab completion shows /db: commands grouped together, making discovery intuitive.",
+    "source": "anthropic-docs",
+    "tags": ["commands", "organization", "namespacing", "structure", "intermediate"]
+  },
+  {
+    "id": "cmd-010",
+    "title": "Create Project-Specific Commands for Recurring Workflows",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "Identify tasks you do repeatedly in a project (code review, generating boilerplate, running diagnostics) and encode them as project-specific commands. Commit them to the repo so the whole team benefits.",
+    "example": "# .claude/commands/new-route.md\n---\ndescription: Scaffold a new Express API route with tests and docs\n---\nCreate a new API route for: $ARGUMENTS\n\nFollow the existing pattern from src/routes/users.ts:\n1. Create src/routes/$ARGUMENTS.ts with CRUD operations\n2. Create src/routes/__tests__/$ARGUMENTS.test.ts\n3. Register the route in src/app.ts (after the last existing route)\n4. Add JSDoc with OpenAPI annotations for each endpoint\n5. Run tests and fix any failures\n\n# Use it:\n/new-route products\n/new-route orders\n/new-route webhooks",
+    "why": "Project-specific commands capture tribal knowledge about how your project works. A new team member can run /new-route and get a correctly-wired route without studying the codebase.",
+    "source": "community",
+    "tags": ["commands", "project-specific", "workflow", "team", "boilerplate", "intermediate"]
+  },
+  {
+    "id": "cmd-011",
+    "title": "Share Commands via the Repository for Team Consistency",
+    "level": "intermediate",
+    "category": "commands",
+    "tip": "Commit your .claude/commands/ directory to version control. This ensures all team members have the same commands available and the command library evolves with the project.",
+    "example": "# .gitignore — DO commit commands, DON'T commit personal settings:\n# .claude/settings.local.json  # personal settings (gitignore this)\n# .claude/commands/            # commit this — shared team commands\n# .claude/agents/              # commit this — shared team agents\n\n# Commit the command library:\ngit add .claude/commands/\ngit commit -m 'chore: add claude code team command library'\n\n# Add to your onboarding docs:\n# 'Run /help to see available Claude Code commands for this project'",
+    "why": "Commands in version control are a living library of team knowledge. They improve over time as the team adds commands, and new team members get the full library immediately on clone.",
+    "source": "community",
+    "tags": ["commands", "version-control", "team", "sharing", "intermediate"]
+  },
+  {
+    "id": "cmd-012",
+    "title": "Build Multi-Step Workflow Commands",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Commands can encode complex multi-step workflows that orchestrate reading, analysis, file creation, and validation. Think of them as macros for entire development workflows.",
+    "example": "# .claude/commands/feature-complete.md\n---\ndescription: Mark a feature complete: tests, docs, PR description, and changelog\nallowed-tools: [Read, Write, Edit, Bash, Glob]\n---\nMark the feature in $ARGUMENTS as complete.\n\n## Completion Checklist\n\n### 1. Test Coverage\n- Run `npm test -- --coverage --collectCoverageFrom=$ARGUMENTS`\n- If coverage < 80%, write missing tests\n\n### 2. Documentation\n- Read $ARGUMENTS and check all public functions have JSDoc\n- Add missing JSDoc comments\n\n### 3. Lint\n- Run `npx eslint $ARGUMENTS --fix`\n\n### 4. PR Description\n- Generate a PR description and save to .claude/pr-description.md\n\n### 5. Changelog\n- Add entry to CHANGELOG.md under [Unreleased]\n\nReport completion status of each step.",
+    "why": "Multi-step workflow commands eliminate the repetitive overhead of feature completion tasks. Run one command and get tests, docs, lint, and PR prep done automatically.",
+    "source": "community",
+    "tags": ["commands", "workflows", "multi-step", "automation", "advanced"]
+  },
+  {
+    "id": "cmd-013",
+    "title": "Chain Commands with Context Passing",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Design commands that pass context to subsequent commands via shared files. Command A writes context to .claude/tmp/, Command B reads it. This enables command chaining without putting everything in one giant command.",
+    "example": "# Command 1: /analyze saves analysis to a temp file\n# .claude/commands/analyze.md\nAnalyze the codebase for architecture issues.\nSave findings as JSON to .claude/tmp/analysis.json:\n{\n  \"issues\": [...],\n  \"priority_files\": [...],\n  \"suggested_refactors\": [...]\n}\n\n# Command 2: /fix-top reads from that file\n# .claude/commands/fix-top.md\nRead .claude/tmp/analysis.json (from previous /analyze run).\nFix the top 3 highest-priority issues found.\nFor each fix: read the file, apply the fix, run tests.\n\n# Workflow:\n/analyze       # Builds the analysis\n/fix-top       # Fixes top issues from that analysis",
+    "why": "Context passing via files creates composable command pipelines. Each command is focused and independently testable, but they chain together for powerful workflows.",
+    "source": "community",
+    "tags": ["commands", "chaining", "composition", "context-passing", "advanced"]
+  },
+  {
+    "id": "cmd-014",
+    "title": "Create Commands That Invoke Agents",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Commands can invoke agents for parts of their workflow, combining the simplicity of a command interface with the specialization of agents. Use this for tasks that need multiple specialist perspectives.",
+    "example": "# .claude/commands/full-review.md\n---\ndescription: Comprehensive review using specialist agents\nallowed-tools: [Read, Bash, Agent]\n---\nPerform a comprehensive review of $ARGUMENTS using specialist agents.\n\n## Review Pipeline\n\n1. Invoke the security-auditor agent on $ARGUMENTS\n   - Collect findings to security-findings.json\n\n2. Invoke the performance-analyzer agent on $ARGUMENTS\n   - Collect findings to perf-findings.json\n\n3. Invoke the test-coverage-checker agent on $ARGUMENTS\n   - Collect findings to test-findings.json\n\n4. Synthesize all three reports into a final review:\n   - Prioritize issues by severity\n   - Group related issues\n   - Create an action plan\n\n# Usage:\n/full-review src/services/PaymentService.ts",
+    "why": "Commands that invoke agents get the best of both worlds: the simple /command interface for humans, and specialist agent depth for the actual analysis.",
+    "source": "community",
+    "tags": ["commands", "agents", "integration", "specialist", "advanced"]
+  },
+  {
+    "id": "cmd-015",
+    "title": "Build Template Commands with Variable Substitution",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Create template commands that use $ARGUMENTS to generate boilerplate for new modules, features, or components following your project's exact structure and patterns.",
+    "example": "# .claude/commands/new-service.md\n---\ndescription: Scaffold a new service with all required files and patterns\n---\nCreate a new service called '$ARGUMENTS' following our service architecture.\n\n## Files to Create\n1. src/services/$ARGUMENTS.ts — service class\n2. src/services/__tests__/$ARGUMENTS.test.ts — tests\n3. src/services/types/$ARGUMENTS.types.ts — TypeScript types\n4. src/services/index.ts — add export (don't create, update existing)\n\n## Pattern to Follow\nCopy the structure from src/services/UserService.ts.\nReplace 'User' with '$ARGUMENTS' (preserving capitalization).\nUpdate the model reference to use the $ARGUMENTS model if it exists.\n\n## After Creation\nRun `npm test -- $ARGUMENTS` and fix any template errors.\n\n# Usage:\n/new-service Order\n/new-service Notification",
+    "why": "Template commands standardize new file creation across the team. Everyone gets the same structure, same test setup, and same type organization without copying and renaming manually.",
+    "source": "community",
+    "tags": ["commands", "templates", "boilerplate", "scaffolding", "advanced"]
+  },
+  {
+    "id": "cmd-016",
+    "title": "Create Diagnostic Commands for Project Health",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Build commands that run a suite of health checks on your project and produce a structured status report. Use these for CI integration or regular project health monitoring.",
+    "example": "# .claude/commands/health-check.md\n---\ndescription: Run comprehensive project health checks and generate report\nallowed-tools: [Read, Bash, Glob, Grep]\n---\nRun a complete project health check and produce a structured report.\n\n## Checks to Run\n1. `npm run typecheck` — TypeScript errors\n2. `npm run lint` — Lint issues\n3. `npm test -- --passWithNoTests` — Test failures\n4. `npm audit --audit-level=high` — Security vulnerabilities\n5. Count TODO/FIXME comments: `grep -r 'TODO\\|FIXME' src/ | wc -l`\n6. Check for console.log statements: `grep -r 'console.log' src/ | wc -l`\n7. Count test files vs source files ratio\n\n## Output Format\nProduce a health score (0-100) and markdown report saved to .claude/health-report.md",
+    "why": "Diagnostic commands provide instant project health visibility. Running /health-check before a release or sprint review surfaces issues that might otherwise slip through.",
+    "source": "community",
+    "tags": ["commands", "diagnostics", "health-check", "reporting", "ci-cd", "advanced"]
+  },
+  {
+    "id": "cmd-017",
+    "title": "Use Plugin-Style Commands for Team Knowledge Base",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "Structure your command library as a team knowledge base, where each command encodes expert knowledge about your domain. Commands should capture the 'how to do X correctly in this project' for common tasks.",
+    "example": "# Commands as encoded expertise:\n\n# .claude/commands/safe-deploy.md — encodes deployment runbook\nDeploy to staging using our safe deploy procedure:\n1. Run `npm run validate` — fail if any checks fail\n2. Create a deploy tag: `git tag deploy/$(date +%Y%m%d-%H%M)`\n3. Run `npm run build` and verify build succeeds\n4. Check .env.staging has all required keys (see .env.example)\n5. Run `npm run migrate:staging` for pending migrations\n6. Deploy with `./scripts/deploy.sh staging`\n7. Run smoke tests: `npm run test:smoke -- --env=staging`\n8. If any step fails: rollback with `./scripts/rollback.sh staging`\n\n# This encodes your entire deployment runbook as a command",
+    "why": "Commands that encode procedures are living runbooks that never go stale (they live with the code), are always available, and execute correctly rather than being misremembered.",
+    "source": "community",
+    "tags": ["commands", "knowledge-base", "runbooks", "documentation", "team", "advanced"]
+  },
+  {
+    "id": "cmd-018",
+    "title": "Version and Namespace Commands for Large Teams",
+    "level": "advanced",
+    "category": "commands",
+    "tip": "For large teams with many commands, add version numbers and owner namespaces to prevent collision and enable gradual migration when commands change significantly.",
+    "example": "# Versioned commands for major workflow changes:\n.claude/commands/\n  review/\n    review-v1.md    # /review:v1 — original review prompt\n    review-v2.md    # /review:v2 — new review with security focus\n    review.md       # /review — current stable version (copy of v2)\n  deploy/\n    deploy-legacy.md  # /deploy:legacy — old deploy workflow\n    deploy.md         # /deploy — current workflow\n\n# Transition strategy:\n# 1. Create v2 alongside v1\n# 2. Test v2 with the team\n# 3. Once stable, update the unversioned command\n# 4. Keep v1 available during transition\n# 5. Remove v1 after everyone has migrated",
+    "why": "Versioning commands allows gradual migration. Teams don't have to update all their workflows immediately when a command improves — they can transition at their own pace.",
+    "source": "community",
+    "tags": ["commands", "versioning", "large-teams", "migration", "organization", "advanced"]
+  }
+]

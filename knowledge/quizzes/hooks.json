@@ -1,0 +1,145 @@
+{
+  "category": "hooks",
+  "questions": [
+    {
+      "id": "hooks-q1",
+      "difficulty": "beginner",
+      "question": "What is the fundamental difference between a PreToolUse hook and a PostToolUse hook?",
+      "options": [
+        "A) PreToolUse hooks run on read operations; PostToolUse hooks run on write operations",
+        "B) PreToolUse hooks fire before Claude executes a tool call and can block it; PostToolUse hooks fire after execution and observe results",
+        "C) PreToolUse hooks are defined in CLAUDE.md; PostToolUse hooks are defined in settings.json",
+        "D) There is no functional difference; the naming is just a convention"
+      ],
+      "correct": "B",
+      "explanation": "PreToolUse hooks execute before the tool call actually runs. This gives you an opportunity to inspect the arguments, log them, or block the action entirely by exiting with a non-zero code. PostToolUse hooks execute after the tool has already run and its output is available — useful for auditing, transforming output, or triggering follow-up actions. Only PreToolUse can prevent the tool from running.",
+      "tip_ref": "hooks-001"
+    },
+    {
+      "id": "hooks-q2",
+      "difficulty": "beginner",
+      "question": "A PreToolUse hook script exits with code 0. What does Claude do next?",
+      "options": [
+        "A) Aborts the tool call and reports an error to the user",
+        "B) Prompts the user to confirm whether to proceed with the tool call",
+        "C) Proceeds normally and executes the tool call as requested",
+        "D) Re-runs the hook script a second time for verification"
+      ],
+      "correct": "C",
+      "explanation": "Exit code 0 is the conventional Unix success signal. When a PreToolUse hook exits with 0, Claude interprets this as 'approved' and proceeds to execute the tool call normally. A non-zero exit code (typically 1 or 2) signals rejection, causing Claude to abort the tool call and surface the hook's output as the reason.",
+      "tip_ref": "hooks-002"
+    },
+    {
+      "id": "hooks-q3",
+      "difficulty": "beginner",
+      "question": "Which hook type is best suited for the SessionStart event?",
+      "options": [
+        "A) PreToolUse, to block the first tool call in the session",
+        "B) PostToolUse, to log the first tool result",
+        "C) A dedicated session lifecycle hook that fires once when a new session begins",
+        "D) There is no hook for session start; hooks only fire around tool calls"
+      ],
+      "correct": "C",
+      "explanation": "Claude Code supports session lifecycle hooks like SessionStart, which fire at the beginning of a new session rather than around a specific tool call. SessionStart is useful for tasks like injecting dynamic context, setting up environment state, logging session metadata, or running setup scripts. It is distinct from tool-level hooks (PreToolUse/PostToolUse) which fire per tool invocation.",
+      "tip_ref": "hooks-003"
+    },
+    {
+      "id": "hooks-q4",
+      "difficulty": "intermediate",
+      "question": "How does a hook use matchers to target only specific tool calls rather than running on every tool invocation?",
+      "options": [
+        "A) Matchers are applied post-execution; the hook always runs but only writes output when matched",
+        "B) The hook configuration includes a matcher field (e.g., tool name or pattern) that filters which tool calls trigger the hook",
+        "C) Matchers are set as environment variables before the hook script is invoked",
+        "D) Matchers only work with PostToolUse hooks; PreToolUse always fires on all tools"
+      ],
+      "correct": "B",
+      "explanation": "Hook configurations support a matcher field where you can specify the tool name or a pattern (e.g., 'Bash', 'Write', or a glob like 'File*'). Claude evaluates this filter before deciding whether to invoke the hook script at all. This avoids running expensive or slow hook scripts for every single tool call when you only care about specific ones, such as blocking dangerous shell commands while allowing safe file reads.",
+      "tip_ref": "hooks-004"
+    },
+    {
+      "id": "hooks-q5",
+      "difficulty": "intermediate",
+      "question": "What is the correct format for a hook script to communicate a blocking reason back to the user when it rejects a tool call?",
+      "options": [
+        "A) Write the reason to a special log file at ~/.claude/hook-errors.log",
+        "B) Set a HOOK_REJECTION_REASON environment variable before exiting",
+        "C) Print the reason to stdout or stderr before exiting with a non-zero exit code",
+        "D) Return a JSON object with a 'reason' key via a socket connection"
+      ],
+      "correct": "C",
+      "explanation": "Hook scripts communicate their decision through the standard Unix mechanisms: exit code signals approve (0) or reject (non-zero), and any text written to stdout or stderr before exiting is captured by Claude and surfaced as the explanation for why the action was blocked. This keeps hooks simple, language-agnostic, and composable with standard shell tooling.",
+      "tip_ref": "hooks-005"
+    },
+    {
+      "id": "hooks-q6",
+      "difficulty": "intermediate",
+      "question": "What environment variables are typically available to a hook script when it fires on a Bash tool call?",
+      "options": [
+        "A) Only standard system environment variables like PATH and HOME",
+        "B) Claude injects variables such as CLAUDE_TOOL_NAME, CLAUDE_TOOL_INPUT, and session identifiers so the hook can inspect the call",
+        "C) Hook scripts have no access to environment variables; they only receive arguments via stdin",
+        "D) Environment variables are available only to PostToolUse hooks, not PreToolUse"
+      ],
+      "correct": "B",
+      "explanation": "When Claude invokes a hook script, it injects contextual environment variables that describe the tool call being made — including the tool name, the serialized input arguments, and session-level identifiers. This gives the hook script everything it needs to make an informed decision (e.g., checking if a Bash command contains a dangerous pattern) without needing to parse complex data structures.",
+      "tip_ref": "hooks-006"
+    },
+    {
+      "id": "hooks-q7",
+      "difficulty": "intermediate",
+      "question": "What is the distinction between a prompt hook and a command hook?",
+      "options": [
+        "A) Prompt hooks modify Claude's system prompt dynamically; command hooks wrap CLI tool invocations",
+        "B) Prompt hooks fire when Claude is about to generate a response; command hooks fire when a slash command is run",
+        "C) Prompt hooks are written in Python; command hooks are written in shell scripts",
+        "D) There is no distinction; 'prompt hook' and 'command hook' are synonyms"
+      ],
+      "correct": "A",
+      "explanation": "A prompt hook intercepts the prompt/context assembly phase and can inject or modify content in the system prompt dynamically at runtime (e.g., injecting today's date, environment info, or secrets). A command hook wraps the execution of a specific CLI tool or slash command, allowing pre/post processing around command invocations. They operate at different layers of the execution pipeline.",
+      "tip_ref": "hooks-007"
+    },
+    {
+      "id": "hooks-q8",
+      "difficulty": "advanced",
+      "question": "A security-conscious team wants to prevent Claude from running any shell command that pipes output to curl. Which hook configuration approach achieves this most precisely?",
+      "options": [
+        "A) Use a PostToolUse hook on Bash that checks the command after it runs and alerts the team",
+        "B) Use a PreToolUse hook on Bash with a matcher for the Bash tool, then inspect CLAUDE_TOOL_INPUT for patterns containing 'curl' and exit non-zero if found",
+        "C) Disable the Bash tool entirely using tool restrictions in the agent config",
+        "D) Add a rule to CLAUDE.md instructing Claude never to use curl in pipes"
+      ],
+      "correct": "B",
+      "explanation": "A PreToolUse hook is the right layer because it fires before execution, allowing actual prevention rather than after-the-fact detection. The hook matches on the Bash tool specifically, then inspects the command string (available via the injected environment variable) for dangerous patterns like pipe-to-curl. Exiting non-zero blocks the command. PostToolUse is too late; disabling Bash entirely is too broad; CLAUDE.md instructions can be bypassed by a sufficiently clever prompt.",
+      "tip_ref": "hooks-008"
+    },
+    {
+      "id": "hooks-q9",
+      "difficulty": "advanced",
+      "question": "A hook script is taking 30 seconds to complete, severely slowing down every Claude tool call. What is the most appropriate way to address this while keeping the security benefit?",
+      "options": [
+        "A) Remove the hook entirely; performance is more important than security",
+        "B) Move the hook to PostToolUse so its latency does not block execution",
+        "C) Optimize the hook to only run its expensive logic for high-risk tool patterns, using fast pre-checks to short-circuit for safe cases",
+        "D) Increase Claude's timeout setting to accommodate the slow hook"
+      ],
+      "correct": "C",
+      "explanation": "The best approach is to make the hook smarter, not to remove it or work around it with timeouts. Adding a fast initial check (e.g., does this command even contain a dangerous pattern?) that exits 0 immediately for benign cases means the expensive logic (e.g., a network lookup, deep analysis) only runs when actually needed. This preserves the security guarantee while minimizing latency impact on the common case.",
+      "tip_ref": "hooks-009"
+    },
+    {
+      "id": "hooks-q10",
+      "difficulty": "advanced",
+      "question": "When debugging a hook that appears to fire correctly but Claude still executes the blocked tool call, what is the most likely root cause to investigate first?",
+      "options": [
+        "A) The hook script is written in an interpreted language (Python/Node) which Claude does not support",
+        "B) The hook exit code is being swallowed by a shell wrapper that always exits 0, so Claude sees approval",
+        "C) Claude Code ignores hook results for tool calls that originate from agent sub-tasks",
+        "D) The hook is configured as PostToolUse instead of PreToolUse, but the tool call completes before the hook can signal rejection"
+      ],
+      "correct": "B",
+      "explanation": "A very common and subtle bug is a wrapper script or shell function that executes the hook logic but does not propagate the exit code — for example, a script that calls a function but doesn't use 'exit $?' or 'set -e'. The wrapper exits 0 regardless of what the inner logic returned. Claude sees the 0 and proceeds. Always test hooks directly with 'bash -x' to observe the actual exit code propagation, and ensure the outermost script exits with the correct code.",
+      "tip_ref": "hooks-010"
+    }
+  ]
+}

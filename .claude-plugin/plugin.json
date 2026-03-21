@@ -1,0 +1,10 @@
+{
+  "name": "claude-sensei",
+  "version": "1.0.0",
+  "description": "Interactive Claude Code best practices coach with self-learning. Teaches tips, runs quizzes, audits projects for maturity scoring, and adapts to your learning journey via Karpathy loop.",
+  "author": {
+    "name": "Viranj Patel"
+  },
+  "license": "MIT",
+  "keywords": ["best-practices", "learning", "coaching", "tips", "quiz", "audit"]
+}
