@@ -68,3 +68,17 @@ claude --plugin-dir "/path/to/claude-sensei"
 ```
 
 No build, install, or compile step needed. Use `/reload-plugins` inside a session after editing files.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `ViranjPatel/claude-sensei`, via the `gh` CLI where available and the `mcp__github__*` tools where it isn't. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical roles, each label string equal to its name (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — one `CONTEXT.md` and one `docs/adr/` at the repo root, both created lazily. See `docs/agents/domain.md`.
