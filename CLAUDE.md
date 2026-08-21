@@ -224,3 +224,17 @@ No build, install, or compile step. Use `/reload-plugins` inside a session after
 - **A new quiz question**: append to `questions`, use `[prefix]-q[n]`, provide 4 self-labelled options, and point `tip_ref` at a real tip.
 - **A new audit rule**: append to the flat `rules[]` array, set `dimension` to one of the 7 categories, pick a `check` from the supported list, and point `fix_tip` at a real tip. Adding a rule changes that dimension's weight denominator, so scores shift.
 - **A new category**: this is a wide change — it touches both `knowledge/` subdirectories, `dimensions` in `rules.json` (rebalance weights back to 100), the `mastery` map in `bootstrap.sh`, the category lists in all 6 commands and 4 agents, and `SKILL.md`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `ViranjPatel/claude-sensei`, via the `gh` CLI where available and the `mcp__github__*` tools where it isn't. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical roles, each label string equal to its name (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` at the repo root is the domain glossary; ADRs go in `docs/adr/` (created lazily). See `docs/agents/domain.md`.
